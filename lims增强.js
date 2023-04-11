@@ -1,24 +1,3 @@
-// ==UserScript==
-// @name        lims增强
-// @namespace   Violentmonkey Scripts
-// @match       *://59.211.223.38:8080/*
-// @grant       none
-// @version     1.0
-// @author      -
-// @description 2022/12/17 15:48:45
-// ==/UserScript==
-// document.ready = ()=>{
-//   console.log("onload show")
-//   try{
-//   document.querySelector('[type=password]').setAttribute("type","")
-//   console.log("trying to get password")
-//   document.querySelector(".pw-icon").click()
-// }
-//   catch (err) {
-//     console.log(err)
-//   }
-// }
-//document.addEventListener('DOMContentLoaded', my_nav(), false)
 setTimeout(function my_nav() {
     // const j_script = document.createElement('script')
     // j_script.src = "http://libs.baidu.com/jquery/2.1.1/jquery.min.js"
