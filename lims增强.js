@@ -300,7 +300,7 @@ function showHTML(newarr, ele, opt) {
     const res = newarr.map(item => {
         return `<tr>
                     <td style='width: 15%;'>${item.orderContainerNo} ${(item.qcName == "N/A" ? "" : ("(" + item.qcName + ")"))}</td>
-                    <td style='width: 10%;'>${(item.qcParent ? (item.qcParent[0] ? item.qcParent[0].orderContainerNo : "") : (qcs.filter(e => e.ext$.ordercontainerno === item.orderContainerNo) ? qcs.filter(e => e.ext$.ordercontainerno === item.orderContainerNo).map(i => (i.category + ":" + i.lowLimit + "~" + i.highLimit + i.concentUnit)) : ""))}</td>
+                    <td style='width: 10%;'>${(item.qcParent ? (item.qcParent[0] ? item.qcParent[0].orderContainerNo : "") : (qcs.filter(e => e.ext$.ordercontainerno === item.orderContainerNo) ? qcs.filter(e => e.ext$.ordercontainerno === item.orderContainerNo).map(i => (i.category + "(" + i.onlyNo + "):" + i.lowLimit + "~" + i.highLimit + i.concentUnit)) : ""))}</td>
                     <td style='width: 35%;'>${(item.mysteryValue ? item.mysteryValue : item.testName)}</td>
                     <td style='width: 15%;'>${(item.orderNo ? item.orderNo : "")}</td>
                     <td style='width: 15%;'>${item.monitorpointname ? item.monitorpointname : (item.clientOrderName ? item.clientOrderName : "")}</td>
