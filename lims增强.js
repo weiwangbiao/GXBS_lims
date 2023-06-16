@@ -193,7 +193,7 @@ function get_qcvalue() {
                 res_type: "json"
             })
             const qcs = [...new Set(r.rows.map(e => e.ext$.ordertaskid))]
-            console.log("QC:",qcs)
+            // console.log("QC:",qcs)
             qcs.forEach(async (list) => {
                 const re = await pajax({
                     url: "http://59.211.223.38:8080/secure/emc/module/bp/order-task-concents/queries/raw",
