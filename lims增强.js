@@ -11,6 +11,7 @@ setTimeout(function my_nav() {
       console.log("app not loaded, exit.")
       return
     }
+    console.log("fucking lims ...")
     //document.querySelector(".nav-logo-text").remove()
     const div = document.createElement("div")
     div.style.position = "relative"
@@ -23,6 +24,7 @@ setTimeout(function my_nav() {
     </div>
         通过样品编号：<input type="text" id="sampleNo" /><button id="search_by_sampleNo" >查任务</button>
         通过任务号：<input type="text" id="inp_orderNo" /><button id="search_by_orderNo" >查样品</button>
+        <button id="get_qcvalue" >查密码样</button>
         <button id="get_fxyps" >复制样品编号</button>
         <div class="show_container" style="display:block"></div>
         `
@@ -155,7 +157,7 @@ async function get_samples(orderno) {
     document.querySelector("#loading").style.display = "none"
     deal_data(samples.yps)
     localStorage.setItem("samples", JSON.stringify(samples))
-    get_qcvalue()
+    //get_qcvalue()
     showHTML(samples.yps, document.querySelector(".show_container"))
 }
 function deal_data(yps) {
@@ -181,6 +183,7 @@ function deal_data(yps) {
     })
 }
 function get_qcvalue() {
+    document.querySelector("#loading").style.display = "block"
     const samples = JSON.parse(localStorage.getItem("samples"))
     const yps = samples.yps
     yps.forEach(async function (item) {
@@ -207,6 +210,8 @@ function get_qcvalue() {
             })
         }
     })
+    document.querySelector("#loading").style.display = "none"
+    showHTML(samples.yps, document.querySelector(".show_container"))
 }
 async function get_pa_yps(pa_no) {
     const r = await pajax({
@@ -409,6 +414,10 @@ function handle(e) {
     if (e.target === document.getElementById("search_by_orderNo")) {
         get_samples(document.getElementById("inp_orderNo").value)
         show()
+        return
+    }
+    if (e.target === document.getElementById("get_qcvalue")) {
+        get_qcvalue()
         return
     }
     if (e.target === document.getElementById("get_fxyps")) {
