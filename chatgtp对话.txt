@@ -77,3 +77,6 @@ const sampleId_SEQ = samples.ypfzs[0].sampleId_SEQ;是什么意思？这样的�
 把row.monitorpointname = sample.monitorpointname || null;改为row.monitorpointname = sample.ext$.monitorpointname || null;
 把http://59.211.223.38:8080定义为常量host，所有出现http://59.211.223.38:8080的地方用host代替
 把samples保存到localStorage,合并代码
+
+
+编写get_qcvalue()函数吧：从localStorage读取samples.yps，遍历每一项，如果这项的qcName为“密码质量控制”，则发起fetch请求，url=http://59.211.223.38:8080/secure/emc/module/bp/bp/order-tasks/order-item-group/queries，请求体{ "p": { "f": { "orderContainerId_SEQ": id }, "n": 1, "s": 50, "qf": {} } }，控制每次并发10个fetch请求，提取请求结果data的ext$.ordertaskid属性值到extOrdertaskIds中
