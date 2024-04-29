@@ -1,0 +1,79 @@
+用js创建samples对象，里面包含ypfzs数组、yps数组、QCs数组
+创建变量orderno=2024038
+用fetch方法请求firstLayer_url=http://59.211.223.38:8080/secure/emc/module/bp/sample/samples/queries/undoable，请求体为
+{ "p": { "f": { "status_IN": "preLogged,done", "orgId_SEQ": "101009" }, "n": 1, "s": 50, "qf": { "projNo_CISC": orderno } } },
+返回json格式结果如下
+{
+
+ "rows": [
+    {
+      "id": 1343507528548416,
+    },
+    {
+     "id": 1343454501707840,
+    },
+    {
+      "id": 1343440975560768,
+    }
+  ],
+ }。
+将rows赋值给samples.cyds= data.rows。
+用fetch请求samples.cyds数组中的每个id，请求地址为secondLayer_url=http://59.211.223.38:8080/secure/emc/module/bp/bp/orders/${id}/sample-container-orders/queries，请求体为
+{ "p": { "f": {}, "n": 1, "s": 500, "qf": {} } }，控制每次并发2个fetch请求，把每个id的请求结果的rows字段增加一个属性sampleId_SEQ = id，然后赋值给samples.ypfzs
+
+运行结果不正确，第二层数据请求同时发送了，没有分批次发送请求
+
+首先通过 fetch 方法请求第一层数据，然后将结果赋值给 samples 对象的 cyds 属性。接着使用每个 cyds 中的 id 发起第二层数据的请求，将每个请求结果的 rows 字段增加 sampleId_SEQ 属性，并将结果赋值给 samples 对象的 ypfzs 属性。同时，控制每次并发两个 fetch 请求，以提高效率。
+
+用fetch请求samples.ypfzs每个数组中的id，请求地址为thirdLayer_url=`http://59.211.223.38:8080/secure/emc/module/bp/bp/orders/${id}/order-containers/queries，请求体为
+{ "p": { "f": { "sampleId_SEQ": sampleId_SEQ, "sampleId": sampleId_SEQ, "orderId": id, "orderAccept": "1" }, "n": 1, "s": 500, "qf": {} } }，控制每次并发10个fetch请求，每个id的请求结果如下：
+{
+
+  "rows": [
+    {
+      "id": 1342719815204928,
+      "mysteryValue": "砷,硒",
+      "orderContainerNo": "BSS240300666",
+      "sampleId": 1343440975560768,
+      "testName": "砷"
+    },
+    {
+      "id": 1342719814279232,
+      "mysteryValue": "六价铬",
+      "orderContainerNo": "BSS240300662",
+      "sampleId": 1343440975560768,
+      "testName": "六价铬"
+    },
+    {
+      "id": 1342719814082624,
+      "mysteryValue": "总汞（DML=0.01）",
+      "orderContainerNo": "BSS240300661",
+      "sampleId": 1343440975560768,
+      "testName": "总汞"
+    },
+    {
+      "id": 1342719810355264,
+      "mysteryValue": "三氯甲烷,四氯化碳,甲苯,苯",
+      "orderContainerNo": "BSS240300654",
+      "sampleId": 1343440975560768,
+      "testName": "挥发性有机物"
+    },
+    {
+      "id": 1342719810109504,
+      "mysteryValue": "硼,钙,钠,钡,钴,钼,钾,铁,铅,铊,铍,铜,铝,银,锌,锑,锰,镁,镉,镍",
+      "orderContainerNo": "BSS240300653",
+      "sampleId": 1343440975560768,
+      "testName": "硼"
+    }
+  ],
+}
+在每个id的请求结果的rows字段的每个数组中做以下操作：
+如果请求数组的mysteryValue不存在或者值为空，就把testName赋值给mysteryValue，增加monitorpointname、qcName、parentOrderNo、clientOrderName属性，初始值均设为null，把请求id所在数组的ext$.monitorpointname赋值给monitorpointname，把请求id所在数组的qcName赋值给请求结果qcName,如果请求id所在数组的parentOrderNo存在，就赋值给parentOrderNo，如果请求id所在数组的clientOrderName存在，就赋值给clientOrderName，然后把每个rows下面的所有数组添加到samples.yps数组中
+
+但是你这两行：const id = samples.ypfzs[0].id;
+const sampleId_SEQ = samples.ypfzs[0].sampleId_SEQ;是什么意思？这样的话id和sampleId_SEQ不是只取到一个固定的数值？我要求是取samples.ypfzs里面的每个数组的不同id和sampleId_SEQ
+
+
+把row.monitorpointname = sample.monitorpointname || null;改为row.monitorpointname = sample.ext$.monitorpointname || null;
+把http://59.211.223.38:8080定义为常量host，所有出现http://59.211.223.38:8080的地方用host代替
+把samples保存到localStorage,合并代码
