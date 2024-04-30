@@ -20,7 +20,7 @@ setTimeout(function my_nav() {
     div.innerHTML =
         `
         <div id="loading" style="display:none;background-color: rgb(0 0 0 / 80%);border-radius: 50px;border: 1px solid rgb(211, 212, 211);z-index: 19891017;position: absolute;width: 50%;color: white;font-size: larger;text-align: center;left: 50%;margin-left: -350px;">
-        数据加载中……
+        数据加载中<span id="proces">999</span>……
     </div>
         通过样品编号：<input type="text" id="sampleNo" /><button id="search_by_sampleNo" >查任务</button>
         通过任务号：<input type="text" id="inp_orderNo" /><button id="search_by_orderNo" >查样品</button>
@@ -110,6 +110,7 @@ async function get_samples(orderno) {
     // 创建 samples 对象//用来装样品数据的大对象，里面会包含cyd、ypfzs、yps三个对象
     const samples = {
         ypfzs: [],
+        ypfzs_bak: [],
         yps: [],
         QCs: []
     };
@@ -191,7 +192,9 @@ async function get_samples(orderno) {
                     .then(() => {
                         if (index < samples.cyds.length) {
                             fetchSecondLayer();
+                            document.querySelector("#proces").innerHTML = index + "/" + samples.cyds.length
                         } else {
+                            samples.ypfzs_bak = JSON.parse(JSON.stringify(samples.ypfzs));
                             // 请求第三层数据
                             fetchThirdLayer();
                         }
@@ -210,7 +213,6 @@ async function get_samples(orderno) {
 
         function fetchNextBatch() {
             const fetchPromises = [];
-
             for (let i = 0; i < concurrency && samples.ypfzs.length > 0; i++) {
                 const sample = samples.ypfzs.shift(); // 从 samples.ypfzs 数组中取出一个样本数据
                 const id = sample.id;
@@ -262,6 +264,7 @@ async function get_samples(orderno) {
                 .then(() => {
                     if (samples.ypfzs.length > 0) {
                         fetchNextBatch();
+                        document.querySelector("#proces").innerHTML = (samples.ypfzs_bak.length-samples.ypfzs.length)+"/"+samples.ypfzs_bak.length
                     } else {
                         // 将 samples 对象保存到 localStorage
                         document.querySelector("#loading").style.display = "none"
