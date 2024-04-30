@@ -123,7 +123,7 @@ async function get_samples(orderno) {
                 "orgId_SEQ": "101009"
             },
             "n": 1,
-            "s": 50,
+            "s": 99999,
             "qf": {
                 "projNo_CISC": orderno
             }
@@ -158,7 +158,7 @@ async function get_samples(orderno) {
                         "p": {
                             "f": {},
                             "n": 1,
-                            "s": 500,
+                            "s": 99999,
                             "qf": {}
                         }
                     };
@@ -226,7 +226,7 @@ async function get_samples(orderno) {
                             "orderAccept": "1"
                         },
                         "n": 1,
-                        "s": 500,
+                        "s": 99999,
                         "qf": {}
                     }
                 };
