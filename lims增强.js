@@ -7,9 +7,9 @@ setTimeout(function my_nav() {
     // mycss.setAttribute('href', 'http://ks.ezyro.com/css/lims.css')
     // document.body.appendChild(mycss)
     const app = document.getElementById("app")
-    if(!app ) {
-      console.log("app not loaded, exit.")
-      return
+    if (!app) {
+        console.log("app not loaded, exit.")
+        return
     }
     console.log("fucking lims ...")
     //document.querySelector(".nav-logo-text").remove()
@@ -34,7 +34,7 @@ setTimeout(function my_nav() {
     document.querySelector(".top-toolbar").insertBefore(showEle, document.querySelector(".nav-logo-text"))
     document.querySelector(".mynav").addEventListener("click", handle)
     document.querySelector("#show_hide").addEventListener("click", show_handle)
-},5000)
+}, 5000)
 // 封装 ajax
 function ajax(options) {
     let defaultoptions = {
@@ -104,179 +104,179 @@ function pajax(options) {
 const host = 'http://59.211.223.38:8080'
 async function get_samples(orderno) {
     document.querySelector("#loading").style.display = "block"
-// 定义常量 host
-const host = "http://59.211.223.38:8080";
+    // 定义常量 host
+    const host = "http://59.211.223.38:8080";
 
-// 创建 samples 对象//用来装样品数据的大对象，里面会包含cyd、ypfzs、yps三个对象
-const samples = {
-  ypfzs: [],
-  yps: [],
-  QCs: []
-};
-// 请求第一层数据
-const firstLayer_url = `${host}/secure/emc/module/bp/sample/samples/queries/undoable`;
-const firstLayer_body = {
-  "p": {
-    "f": {
-      "status_IN": "preLogged,done",
-      "orgId_SEQ": "101009"
-    },
-    "n": 1,
-    "s": 50,
-    "qf": {
-      "projNo_CISC": orderno
-    }
-  }
-};
-
-fetch(firstLayer_url, {
-  method: 'POST',
-  body: JSON.stringify(firstLayer_body),
-  headers: {
-    'Content-Type': 'application/json'
-  }
-})
-.then(response => response.json())
-.then(data => {
-  // 将结果赋值给 samples.cyds
-  samples.cyds = data.rows;
-
-  // 请求第二层数据
-  const secondLayer_url = `${host}/secure/emc/module/bp/bp/orders`;
-
-  // 控制每次并发 5 个 fetch 请求
-  const concurrency = 5;
-  let index = 0;
-
-  function fetchSecondLayer() {
-    const fetchPromises = [];
-
-    for (let i = 0; i < concurrency && index < samples.cyds.length; i++) {
-      const id = samples.cyds[index].id;
-      const secondLayer_body = {
+    // 创建 samples 对象//用来装样品数据的大对象，里面会包含cyd、ypfzs、yps三个对象
+    const samples = {
+        ypfzs: [],
+        yps: [],
+        QCs: []
+    };
+    // 请求第一层数据
+    const firstLayer_url = `${host}/secure/emc/module/bp/sample/samples/queries/undoable`;
+    const firstLayer_body = {
         "p": {
-          "f": {},
-          "n": 1,
-          "s": 500,
-          "qf": {}
+            "f": {
+                "status_IN": "preLogged,done",
+                "orgId_SEQ": "101009"
+            },
+            "n": 1,
+            "s": 50,
+            "qf": {
+                "projNo_CISC": orderno
+            }
         }
-      };
+    };
 
-      const fetchPromise = fetch(`${secondLayer_url}/${id}/sample-container-orders/queries`, {
+    fetch(firstLayer_url, {
         method: 'POST',
-        body: JSON.stringify(secondLayer_body),
+        body: JSON.stringify(firstLayer_body),
         headers: {
-          'Content-Type': 'application/json'
+            'Content-Type': 'application/json'
         }
-      })
-      .then(response => response.json())
-      .then(data => {
-        // 将请求结果的 rows 字段增加 sampleId_SEQ 属性
-        data.rows.forEach(item => {
-          item.sampleId_SEQ = id;
-        });
-        // 将结果添加到 samples.ypfzs
-        samples.ypfzs = samples.ypfzs.concat(data.rows);
-        // 在 samples.ypfzs 中标记已处理过的第二层数据
-        samples.ypfzs.forEach(sample => {
-          sample.processed = true;
-        });
-      });
+    })
+        .then(response => response.json())
+        .then(data => {
+            // 将结果赋值给 samples.cyds
+            samples.cyds = data.rows;
 
-      fetchPromises.push(fetchPromise);
-      index++;
+            // 请求第二层数据
+            const secondLayer_url = `${host}/secure/emc/module/bp/bp/orders`;
+
+            // 控制每次并发 5 个 fetch 请求
+            const concurrency = 5;
+            let index = 0;
+
+            function fetchSecondLayer() {
+                const fetchPromises = [];
+
+                for (let i = 0; i < concurrency && index < samples.cyds.length; i++) {
+                    const id = samples.cyds[index].id;
+                    const secondLayer_body = {
+                        "p": {
+                            "f": {},
+                            "n": 1,
+                            "s": 500,
+                            "qf": {}
+                        }
+                    };
+
+                    const fetchPromise = fetch(`${secondLayer_url}/${id}/sample-container-orders/queries`, {
+                        method: 'POST',
+                        body: JSON.stringify(secondLayer_body),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            // 将请求结果的 rows 字段增加 sampleId_SEQ 属性
+                            data.rows.forEach(item => {
+                                item.sampleId_SEQ = id;
+                            });
+                            // 将结果添加到 samples.ypfzs
+                            samples.ypfzs = samples.ypfzs.concat(data.rows);
+                            // 在 samples.ypfzs 中标记已处理过的第二层数据
+                            samples.ypfzs.forEach(sample => {
+                                sample.processed = true;
+                            });
+                        });
+
+                    fetchPromises.push(fetchPromise);
+                    index++;
+                }
+
+                Promise.all(fetchPromises)
+                    .then(() => {
+                        if (index < samples.cyds.length) {
+                            fetchSecondLayer();
+                        } else {
+                            // 请求第三层数据
+                            fetchThirdLayer();
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+
+            fetchSecondLayer();
+        })
+        .catch(error => console.error('Error:', error));
+
+    function fetchThirdLayer() {
+        // 请求第三层数据
+        const thirdLayer_url = `${host}/secure/emc/module/bp/bp/orders`;
+        const concurrency = 10;
+
+        function fetchNextBatch() {
+            const fetchPromises = [];
+
+            for (let i = 0; i < concurrency && samples.ypfzs.length > 0; i++) {
+                const sample = samples.ypfzs.shift(); // 从 samples.ypfzs 数组中取出一个样本数据
+                const id = sample.id;
+                const sampleId_SEQ = sample.sampleId_SEQ;
+                const thirdLayer_body = {
+                    "p": {
+                        "f": {
+                            "sampleId_SEQ": sampleId_SEQ,
+                            "sampleId": sampleId_SEQ,
+                            "orderId": id,
+                            "orderAccept": "1"
+                        },
+                        "n": 1,
+                        "s": 500,
+                        "qf": {}
+                    }
+                };
+
+                const fetchPromise = fetch(`${thirdLayer_url}/${id}/order-containers/queries`, {
+                    method: 'POST',
+                    body: JSON.stringify(thirdLayer_body),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // 处理请求结果的 rows 字段
+                        data.rows.forEach(row => {
+                            // 如果 mysteryValue 不存在或为空，用 testName 替代
+                            if (!row.mysteryValue || row.mysteryValue.trim() === '') {
+                                row.mysteryValue = row.testName;
+                            }
+                            // 添加额外属性
+                            row.monitorpointname = sample.ext$.monitorpointname || null;
+                            row.qcName = sample.qcName || null;
+                            row.parentOrderNo = sample.parentOrderNo || null;
+                            row.clientOrderName = sample.clientOrderName || null;
+                        });
+
+                        // 将结果添加到 samples.yps 数组中
+                        samples.yps = samples.yps.concat(data.rows);
+                    });
+
+                fetchPromises.push(fetchPromise);
+            }
+
+            Promise.all(fetchPromises)
+                .then(() => {
+                    if (samples.ypfzs.length > 0) {
+                        fetchNextBatch();
+                    } else {
+                        // 将 samples 对象保存到 localStorage
+                        document.querySelector("#loading").style.display = "none"
+                        deal_data(samples.yps)
+                        localStorage.setItem("samples", JSON.stringify(samples))
+                        //get_qcvalue()
+                        showHTML(samples.yps, document.querySelector(".show_container"))
+
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        fetchNextBatch();
     }
-
-    Promise.all(fetchPromises)
-      .then(() => {
-        if (index < samples.cyds.length) {
-          fetchSecondLayer();
-        } else {
-          // 请求第三层数据
-          fetchThirdLayer();
-        }
-      })
-      .catch(error => console.error('Error:', error));
-  }
-
-  fetchSecondLayer();
-})
-.catch(error => console.error('Error:', error));
-
-function fetchThirdLayer() {
-  // 请求第三层数据
-  const thirdLayer_url = `${host}/secure/emc/module/bp/bp/orders`;
-  const concurrency = 10;
-
-  function fetchNextBatch() {
-    const fetchPromises = [];
-
-    for (let i = 0; i < concurrency && samples.ypfzs.length > 0; i++) {
-      const sample = samples.ypfzs.shift(); // 从 samples.ypfzs 数组中取出一个样本数据
-      const id = sample.id;
-      const sampleId_SEQ = sample.sampleId_SEQ;
-      const thirdLayer_body = {
-        "p": {
-          "f": {
-            "sampleId_SEQ": sampleId_SEQ,
-            "sampleId": sampleId_SEQ,
-            "orderId": id,
-            "orderAccept": "1"
-          },
-          "n": 1,
-          "s": 500,
-          "qf": {}
-        }
-      };
-
-      const fetchPromise = fetch(`${thirdLayer_url}/${id}/order-containers/queries`, {
-        method: 'POST',
-        body: JSON.stringify(thirdLayer_body),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        // 处理请求结果的 rows 字段
-        data.rows.forEach(row => {
-          // 如果 mysteryValue 不存在或为空，用 testName 替代
-          if (!row.mysteryValue || row.mysteryValue.trim() === '') {
-            row.mysteryValue = row.testName;
-          }
-          // 添加额外属性
-          row.monitorpointname = sample.ext$.monitorpointname || null;
-          row.qcName = sample.qcName || null;
-          row.parentOrderNo = sample.parentOrderNo || null;
-          row.clientOrderName = sample.clientOrderName || null;
-        });
-
-        // 将结果添加到 samples.yps 数组中
-        samples.yps = samples.yps.concat(data.rows);
-      });
-
-      fetchPromises.push(fetchPromise);
-    }
-
-    Promise.all(fetchPromises)
-      .then(() => {
-        if (samples.ypfzs.length > 0) {
-          fetchNextBatch();
-        } else {
-          // 将 samples 对象保存到 localStorage
-                document.querySelector("#loading").style.display = "none"
-    deal_data(samples.yps)
-    localStorage.setItem("samples", JSON.stringify(samples))
-    //get_qcvalue()
-    showHTML(samples.yps, document.querySelector(".show_container"))
-
-        }
-      })
-      .catch(error => console.error('Error:', error));
-  }
-
-  fetchNextBatch();
-}
 }
 function deal_data(yps) {
     yps.forEach((item) => {
@@ -365,14 +365,14 @@ function data_wash() {
     const newyps = yps.filter(item => {
         const flag = []
         for (let key in opt) {
-          if (opt[key]){
-              try {
-                flag.push(item[key]==(opt[key]))//flag.push(item[key].includes(opt[key]))
+            if (opt[key]) {
+                try {
+                    flag.push(item[key] == (opt[key]))//flag.push(item[key].includes(opt[key]))
+                }
+                catch (err) {
+                    // console.log(err)
+                }
             }
-            catch (err) {
-                // console.log(err)
-            }
-          }
         }
         return flag.every(e => e)
     })
@@ -490,19 +490,19 @@ function show_handle(e) {
         return
     }
 }
-    function show() {
-          const div = document.querySelector(".mynav")
-        div.style.display = "block"
-      document.querySelector(".show_container").style.display = "block"
-        document.getElementById("show_hide").innerHTML = "-"
-        isshow = true
-    }
-    function hide() {
-          const div = document.querySelector(".mynav")
-        div.style.display = "none"
-        document.getElementById("show_hide").innerHTML = "+"
-        isshow = false
-    }
+function show() {
+    const div = document.querySelector(".mynav")
+    div.style.display = "block"
+    document.querySelector(".show_container").style.display = "block"
+    document.getElementById("show_hide").innerHTML = "-"
+    isshow = true
+}
+function hide() {
+    const div = document.querySelector(".mynav")
+    div.style.display = "none"
+    document.getElementById("show_hide").innerHTML = "+"
+    isshow = false
+}
 function handle(e) {
     // console.log(e.target)
     const div = document.querySelector(".show_container")
