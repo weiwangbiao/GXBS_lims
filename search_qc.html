@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynamic Form</title>
+</head>
+<body>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 创建动态表单和结果显示区域
+    var dynamicFormDiv = document.createElement('div');
+    dynamicFormDiv.id = 'dynamicForm';
+
+    // 创建下拉框
+    var selectDropdown = document.createElement('select');
+    selectDropdown.id = 'dropdown';
+
+    var categories = ['only No', 'batch No', 'category' ];
+    categories.forEach(function(category) {
+        var option = document.createElement('option');
+        option.value = category.replace(/\s+/g, '');
+        option.textContent = category;
+        selectDropdown.appendChild(option);
+    });
+
+    dynamicFormDiv.appendChild(selectDropdown);
+
+    // 创建输入框
+    var inputField = document.createElement('input');
+    inputField.type = 'text';
+    inputField.id = 'inputField';
+    inputField.placeholder = 'Enter something';
+    inputField.onkeydown = handleKeyPress;
+
+    dynamicFormDiv.appendChild(inputField);
+
+    // 创建提交按钮
+    var submitButton = document.createElement('button');
+    submitButton.textContent = 'Submit';
+    submitButton.onclick = submitForm;
+
+    dynamicFormDiv.appendChild(submitButton);
+
+    document.body.appendChild(dynamicFormDiv);
+
+    // 创建结果显示区域
+    var resultsDiv = document.createElement('div');
+    resultsDiv.id = 'results';
+    document.body.appendChild(resultsDiv);
+});
+
+// 处理键盘按下事件
+function handleKeyPress(event) {
+    if (event.key === 'Enter') {
+        submitForm();
+    }
+}
+
+// 提交表单的函数
+function submitForm() {
+    var selectedOption = document.getElementById("dropdown").value;
+    var inputText = document.getElementById("inputField").value;
+
+    // 构建请求的 URL
+    var url = 'http://gxpf.hima.eu.org:8888/search_qc';
+
+    // 构建请求体
+    var requestBody = {
+        selectedOption: selectedOption,
+        inputText: inputText
+    };
+
+    // 发起 fetch 请求
+    fetch(url, {
+        method: 'POST', // 或者 'GET'
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+    })
+    .then(response => response.json())
+    .then(data => {
+        renderResults(data);
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
+// 渲染查询结果
+function renderResults(results) {
+    var html = '<table border="1">';
+    html += '<tr><th>Category</th><th>Batch No</th><th>Only No</th><th>Std Value</th><th>Concentration</th><th>Effective Date</th></tr>';
+    results.forEach(function(item) {
+        html += '<tr>';
+        html += '<td>' + item.category + '</td>';
+        html += '<td>' + item.batchNo + '</td>';
+        html += '<td>' + item.onlyNo + '</td>';
+        html += '<td>' + (item.stdValue ? item.stdValue : '') + '</td>';
+        html += '<td>' + (item.ext$ ? item.ext$.concentration : '') + '</td>';
+        html += '<td>' + item.effectiveDate + '</td>';
+        html += '</tr>';
+    });
+    html += '</table>';
+
+    document.getElementById('results').innerHTML = html;
+}
+</script>
+
+</body>
+</html>
