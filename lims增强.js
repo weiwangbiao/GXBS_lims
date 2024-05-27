@@ -616,7 +616,7 @@ function update2db_qc() {
             headers: { 'Content-Type': 'application/json' }
         })
             .then(response => response.json())
-            .then(data => alert(data))
+            .then(data => alert(data.msg))
     }
 }
 //======================================================================================================
