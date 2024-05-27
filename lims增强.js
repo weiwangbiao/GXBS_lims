@@ -16,7 +16,7 @@ setTimeout(function my_nav() {
     const div = document.createElement("div")
     div.style.position = "relative"
     div.classList = "mynav"
-    div.style = "display:none"
+    //div.style = "display:none"
     div.innerHTML =
         `
         <div id="loading" style="display:none;background-color: rgb(0 0 0 / 80%);border-radius: 50px;border: 1px solid rgb(211, 212, 211);z-index: 19891017;position: absolute;width: 50%;color: white;font-size: larger;text-align: center;left: 50%;margin-left: -350px;">
@@ -35,6 +35,7 @@ setTimeout(function my_nav() {
     document.querySelector(".top-toolbar").insertBefore(showEle, document.querySelector(".nav-logo-text"))
     document.querySelector(".mynav").addEventListener("click", handle)
     document.querySelector("#show_hide").addEventListener("click", show_handle)
+    search_qc()
 }, 5000)
 // 封装 ajax
 function ajax(options) {
@@ -620,3 +621,311 @@ function update2db_qc() {
     }
 }
 //======================================================================================================
+
+
+//---------------------新功能----------------------------
+function search_qc(){
+
+        var categories = ['only No', 'batch No', 'category', 'createdById', 'remark', 'application'];
+
+
+            // 创建动态表单和结果显示区域
+            var dynamicFormDiv = document.createElement('div');
+            dynamicFormDiv.id = 'dynamicForm';
+
+            // 创建添加条件按钮
+            var addButton = document.createElement('button');
+            addButton.textContent = '+';
+            addButton.onclick = function () {
+                addCondition(categories);
+            };
+
+            dynamicFormDiv.appendChild(addButton);
+
+            // 创建提交按钮
+            var submitButton = document.createElement('button');
+            submitButton.textContent = 'Submit';
+            submitButton.onclick = submitForm;
+
+            dynamicFormDiv.appendChild(submitButton);
+
+            document.getElementById('get_fxyps').parentNode.children[6].appendChild(dynamicFormDiv);
+
+            // 创建结果显示区域
+            var resultsDiv = document.createElement('div');
+            resultsDiv.id = 'results';
+            document.querySelector(".show_container").appendChild(resultsDiv);
+
+            // 添加初始查询条件
+            addCondition(categories);
+
+            // 检查初始查询条件数量，如果只有一个，隐藏删除按钮
+            var initialDropdowns = document.querySelectorAll('.dropdown');
+            var removeButtons = document.querySelectorAll('.removeButton');
+            if (initialDropdowns.length === 1) {
+                removeButtons[0].style.display = 'none';
+            }
+
+
+        // 添加查询条件的函数
+        function addCondition(categories) {
+            var dynamicFormDiv = document.getElementById('dynamicForm');
+            var dropdowns = document.querySelectorAll('.dropdown');
+
+            // 检查已添加的条件数量
+            if (dropdowns.length >= categories.length) {
+                alert('You can only add up to ' + categories.length + ' conditions.');
+                return;
+            }
+
+            var selectDropdown = document.createElement('select');
+            selectDropdown.className = 'dropdown';
+
+            categories.forEach(function (category) {
+                var option = document.createElement('option');
+                option.value = category.replace(/\s+/g, '');
+                option.textContent = category;
+                selectDropdown.appendChild(option);
+            });
+
+            dynamicFormDiv.insertBefore(selectDropdown, dynamicFormDiv.lastChild);
+
+            var inputField = document.createElement('input');
+            inputField.type = 'text';
+            inputField.className = 'inputField';
+            inputField.placeholder = 'Enter something';
+
+            // 添加按下回车键提交的功能
+            inputField.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    submitForm();
+                }
+            });
+
+            dynamicFormDiv.insertBefore(inputField, dynamicFormDiv.lastChild);
+
+            var removeButton = document.createElement('button');
+            removeButton.textContent = 'X';
+            removeButton.onclick = function () {
+                dynamicFormDiv.removeChild(selectDropdown);
+                dynamicFormDiv.removeChild(inputField);
+                dynamicFormDiv.removeChild(removeButton);
+
+                // 检查剩余的查询条件数量，如果只剩下一个，隐藏删除按钮
+                var remainingDropdowns = document.querySelectorAll('.dropdown');
+                var removeButtons = document.querySelectorAll('.removeButton');
+                if (remainingDropdowns.length === 1) {
+                    removeButtons[0].style.display = 'none';
+                }
+            };
+            removeButton.className = 'removeButton';
+
+            dynamicFormDiv.insertBefore(removeButton, dynamicFormDiv.lastChild);
+
+            // 检查已添加的条件数量是否达到数组长度，如果是，则禁用添加按钮
+            if (dropdowns.length >= categories.length - 1) {
+                addButton.disabled = true;
+            }
+        }
+
+        // 提交表单的函数
+        function submitForm() {
+            var selectedOptions = document.querySelectorAll('.dropdown');
+            var inputFields = document.querySelectorAll('.inputField');
+
+            // 检查是否至少有一个查询条件
+            if (selectedOptions.length === 0 || inputFields.length === 0) {
+                alert('Please add at least one search condition.');
+                return;
+            }
+            hasEmpty = false;
+            inputFields.forEach(inputField=> {
+                if(!inputField.value.trim()){
+                    hasEmpty=true;
+                }
+            })
+            if (hasEmpty){
+                    alert('Please input available search condition.');
+                    return;
+                }
+
+            var requestBody = [];
+            selectedOptions.forEach(function (option, index) {
+                var selectedOption = option.value.trim();
+                var inputText = inputFields[index].value.trim();
+                requestBody.push({
+                    selectedOption: selectedOption,
+                    inputText: inputText
+                });
+            });
+
+            // 修改requestBody为对象{}
+            requestBody = {'requestBody': requestBody, 'limit': 50}
+            var url = 'http://gxpf.hima.eu.org:8888/search_qc';
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    renderResults(data);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        }
+        // 渲染查询结果
+        function renderResults(results) {
+            if (results.code==0){
+                alert(results.msg);
+                return;
+            }
+            if (results.rows.length==0){
+                alert('Reccept 0 result');
+                return;
+            }
+            let html = `<table id="container">
+                <tr>
+                    <th style="width: 25%">Category</th>
+                    <th style="width: 10%">Batch No</th>
+                    <th style="width: 10%">Only No</th>
+                    <th style="width: 5%">Std Value</th>
+                    <th style="width: 30%">Concentration</th>
+                    <th style="width: 8%">Effective Date</th>
+                    <th style="width: 4%">createdById</th>
+                    <th style="width: 8%">remark</th>
+                </tr>`;
+
+            results.rows.forEach(item => {
+                html += `<tr>
+                    <td>${item.category}</td>
+                    <td>${item.batchNo}</td>
+                    <td>${item.onlyNo}</td>
+                    <td>${item.stdValue ? item.stdValue : ''}</td>`;
+                /**if (isIOS()) {
+                    var a = item.category.split(',').length > 1;
+                } else {
+                    var a = (item.category.split(/,(?=[\p{Unified_Ideograph}a-zA-Z])|(?<=[\p{Unified_Ideograph}a-zA-Z]),/u).length > 1);
+                }**/
+                var a = item.category.split(',').length > 1;
+                var b = (!item.ext$.concentration && !item.stdValue);
+                if (a || b) {
+                    html += `<td id="TD${item.onlyNo}"><button onclick="showStockInfo(${item.stockId},'${item.onlyNo}')">+${item.ext$.concentration ? item.ext$.concentration : ''}</button>`;
+                } else {
+                    html += `<td id="TD${item.onlyNo}">${item.ext$.concentration ? item.ext$.concentration : ''}`;
+                }
+                html += `${item.ext$.stockdilutionmethod?('<font color="green">【稀释:'+item.ext$.stockdilutionmethod+'】</font>'):''}</td>`
+                html += `<td>${item.effectiveDate}</td>
+                 <td>${item.createdById}</td>
+                 <td>${item.remark ? item.remark +'<br>'+ item.receiveDate : item.receiveDate}</td>
+                </tr>`;
+            });
+
+            html += `</table>`;
+            document.getElementById('results').innerHTML = html;
+        }
+        // 判断是否为iOS设备
+        function isIOS() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        }
+
+        function showStockInfo(stockId, onlyNo) {
+            /**原生url
+            ext_url = 'http://59.211.223.38:8080/secure/emc/module/mdm/basemdm/mtls/stocks/'+ stockId + '/concents/queries'
+            fetch(ext_url, {
+                method: 'POST',
+                body: JSON.stringify({"p":{"f":{},"n":1,"s":50,"qf":{}}}),
+                headers: {'Content-Type': 'application/json'}
+            })
+            .then(response => response.json())
+            .then(data=>renderTable(data.rows))
+            **/
+            ext_url = 'http://gxpf.hima.eu.org:8888/search_qcxq'
+            fetch(ext_url, {
+                method: 'POST',
+                body: JSON.stringify({ "stockId": stockId }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => renderTable(data, stockId, onlyNo))
+            return ''
+        }
+
+        function renderTable(data, stockId, onlyNo) {
+            if (data.code==0){
+                alert(data.msg);
+                return;
+            }
+            if (data.rows.length==0){
+                alert('Reccept 0 result');
+                return;
+            }
+            // 创建表格元素
+            var table = document.createElement("table");
+            table.border = "1";
+
+            // 创建表头
+            var thead = document.createElement("thead");
+            var trHead = document.createElement("tr");
+
+            var thCategory = document.createElement("th");
+            thCategory.textContent = "Category";
+            trHead.appendChild(thCategory);
+
+            var thStdValueUncertainty = document.createElement("th");
+            thStdValueUncertainty.textContent = "Std±Uncer";
+            trHead.appendChild(thStdValueUncertainty);
+
+            var thLimitRange = document.createElement("th");
+            thLimitRange.textContent = "Low~High";
+            trHead.appendChild(thLimitRange);
+
+            thead.appendChild(trHead);
+            table.appendChild(thead);
+
+            // 创建表格内容
+            var tbody = document.createElement("tbody");
+
+            data.rows.forEach(function (item) {
+                var tr = document.createElement("tr");
+
+                var tdCategory = document.createElement("td");
+                tdCategory.textContent = item.category;
+                tr.appendChild(tdCategory);
+
+                var tdStdValueUncertainty = document.createElement("td");
+                tdStdValueUncertainty.textContent = item.stdValue?item.stdValue:'' + (item.uncertainty ? (" ± " + item.uncertainty) : '') + item.concentUnitName?item.concentUnitName:'';
+                tr.appendChild(tdStdValueUncertainty);
+
+                var tdLimitRange = document.createElement("td");
+                tdLimitRange.textContent = (item.lowLimit?item.lowLimit:'') +(item.highLimit?("~" + item.highLimit):'');
+                tr.appendChild(tdLimitRange);
+
+                tbody.appendChild(tr);
+            });
+
+            table.appendChild(tbody);
+
+            // 找到另一个表格中目标单元格的元素
+            var targetCell = document.getElementById("TD" + onlyNo);
+
+            // 创建一个包含新表格的父元素
+            var wrapperDiv = document.createElement("div");
+
+            // 将新表格添加到包装器中
+            wrapperDiv.appendChild(table);
+
+            // 将包装器插入到目标单元格中
+            targetCell.appendChild(wrapperDiv);
+        }
+
+}
+
+
+//-------------------------------------------------------
