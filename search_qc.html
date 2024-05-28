@@ -159,18 +159,16 @@
                     return;    
                 }
 
-            var requestBody = [];
+            var query = {};
             selectedOptions.forEach(function (option, index) {
                 var selectedOption = option.value.trim();
                 var inputText = inputFields[index].value.trim();
-                requestBody.push({
-                    selectedOption: selectedOption,
-                    inputText: inputText
-                });
+                query[selectedOption] = inputText
             });
             
             // 修改requestBody为对象{}
-            requestBody = {'requestBody': requestBody, 'limit': 50}
+            requestBody = {'query': query, 'limit': 50}
+
             var url = 'http://gxpf.hima.eu.org:8888/search_qc';
 
             fetch(url, {
