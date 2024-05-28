@@ -25131,7 +25131,7 @@ data = data=[
 ]
 
 def stort_qcxq(data):
-        mongo_uri = "mongodb://user:shasiXiaoriben!@158.101.93.192:27017/"
+        mongo_uri = "mongodb://"
         database_name = "GXSTHJ_LIMS"
         collection_name = "zhikongyangxiangqing"
 
@@ -25155,7 +25155,7 @@ def dele_qcxq(data):
             allattrs.extend(attrs)
         newattrs = list(set(allattrs))
 
-        mongo_uri = "mongodb://user:shasiXiaoriben!@158.101.93.192:27017/"
+        mongo_uri = "mongodb://"
         database_name = "GXSTHJ_LIMS"
         collection_name = "zhikongyangxiangqing"
 
@@ -25170,7 +25170,7 @@ def dele_qcxq(data):
             )
 
 def qcxq():
-        mongo_uri = "mongodb://user:shasiXiaoriben!@158.101.93.192:27017/"
+        mongo_uri = "mongodb://"
         database_name = "GXSTHJ_LIMS"
         collection_name = "zhikongyangxiangqing"
 
