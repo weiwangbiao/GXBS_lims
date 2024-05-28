@@ -16,7 +16,7 @@ setTimeout(function my_nav() {
     const div = document.createElement("div")
     div.style.position = "relative"
     div.classList = "mynav"
-    //div.style = "display:none"
+    div.style = "display:none"
     div.innerHTML =
         `
         <div id="loading" style="display:none;background-color: rgb(0 0 0 / 80%);border-radius: 50px;border: 1px solid rgb(211, 212, 211);z-index: 19891017;position: absolute;width: 50%;color: white;font-size: larger;text-align: center;left: 50%;margin-left: -350px;">
