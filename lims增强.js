@@ -26,6 +26,7 @@ setTimeout(function my_nav() {
         通过任务号：<input type="text" id="inp_orderNo" /><button id="search_by_orderNo" >查样品</button>
         <button id="get_qcvalue" >查密码样</button>
         <button id="get_fxyps" >复制样品编号</button>
+        <span id="dynamicForm"></span>
         <button id="updatedb_qc" >更新质控样数据库</button>
         <div class="show_container" style="display:block"></div>
         `
@@ -649,7 +650,7 @@ function search_qc(){
 
             dynamicFormDiv.appendChild(submitButton);
 
-            document.getElementById('get_fxyps').parentNode.children[6].appendChild(dynamicFormDiv);
+            document.getElementById('dynamicForm').appendChild(dynamicFormDiv);
 
             // 创建结果显示区域
             var resultsDiv = document.createElement('div');
