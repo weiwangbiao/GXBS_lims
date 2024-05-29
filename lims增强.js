@@ -554,8 +554,12 @@ function handle(e) {
     }
     document.querySelectorAll(".sinfo").forEach(item=>{
         if(item==e.target){
-        showStockInfo(e.target.id.split("_")[0], e.target.id.split("_")[1])
-        return
+            if(e.target.querySelector("div")){
+                e.target.removeChild(e.target.querySelector("div"))
+            }else{
+                showStockInfo(e.target.id.split("_")[0], e.target.id.split("_")[1])
+                return
+            }
         }
     })
 }
