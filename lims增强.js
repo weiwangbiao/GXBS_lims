@@ -26,7 +26,7 @@ setTimeout(function my_nav() {
         通过任务号：<input type="text" id="inp_orderNo" /><button id="search_by_orderNo" >查样品</button>
         <button id="get_qcvalue" >查密码样</button>
         <button id="get_fxyps" >复制样品编号</button>
-        <span id="dynamicForm"></span>
+        <span id="dForm"></span>
         <button id="updatedb_qc" >更新质控样数据库</button>
         <div class="show_container" style="display:block"></div>
         `
@@ -551,7 +551,13 @@ function handle(e) {
     if (e.target === document.getElementById("updatedb_qc")) {
         update2db_qc()
         return
-    }    
+    }
+    document.querySelectorAll(".sinfo").forEach(item=>{
+        if(item==e.target){
+        showStockInfo(e.target.id.split("_")[0], e.target.id.split("_")[1])
+        return
+        }
+    })
 }
 
 //===========================查最新50条信息===================存储到db========================================================
@@ -631,7 +637,7 @@ function search_qc(){
 
 
             // 创建动态表单和结果显示区域
-            var dynamicFormDiv = document.createElement('div');
+            var dynamicFormDiv = document.createElement('span');
             dynamicFormDiv.id = 'dynamicForm';
 
             // 创建添加条件按钮
@@ -650,7 +656,7 @@ function search_qc(){
 
             dynamicFormDiv.appendChild(submitButton);
 
-            document.getElementById('dynamicForm').appendChild(dynamicFormDiv);
+            document.getElementById('dForm').appendChild(dynamicFormDiv);
 
             // 创建结果显示区域
             var resultsDiv = document.createElement('div');
@@ -750,19 +756,22 @@ function search_qc(){
                     return;
                 }
 
-            var requestBody = [];
+            var query = {};
             selectedOptions.forEach(function (option, index) {
                 var selectedOption = option.value.trim();
                 var inputText = inputFields[index].value.trim();
-                requestBody.push({
-                    selectedOption: selectedOption,
-                    inputText: inputText
-                });
+                query[selectedOption] = inputText
             });
 
             // 修改requestBody为对象{}
-            requestBody = {'requestBody': requestBody, 'limit': 50}
-            var url = 'http://gxpf.hima.eu.org:8888/search_qc';
+            // {"p":{"n":1,"s":50,"qf":{"batchNo_CISC":"11","standardName_CISC":"钾"}}}
+            var qf = {}
+            for(key in query){
+                qf[key+'_CISC']=query[key];
+               }
+            var requestBody = {"p":{"n":1,"s":50,"o":[{"receiveDate":"desc"}],"qf":qf}}
+            // var requestBody = {'query': query, 'limit': 50}
+            var url = 'http://59.211.223.38:8080/secure/emc/module/mdm/basemdm/mtl-receives/queries/searchable';
 
             fetch(url, {
                 method: 'POST',
@@ -789,7 +798,7 @@ function search_qc(){
                 alert('Reccept 0 result');
                 return;
             }
-            let html = `<table id="container">
+            let html = `<table border="1" id="container">
                 <tr>
                     <th style="width: 25%">Category</th>
                     <th style="width: 10%">Batch No</th>
@@ -807,19 +816,7 @@ function search_qc(){
                     <td>${item.batchNo}</td>
                     <td>${item.onlyNo}</td>
                     <td>${item.stdValue ? item.stdValue : ''}</td>`;
-                /**if (isIOS()) {
-                    var a = item.category.split(',').length > 1;
-                } else {
-                    var a = (item.category.split(/,(?=[\p{Unified_Ideograph}a-zA-Z])|(?<=[\p{Unified_Ideograph}a-zA-Z]),/u).length > 1);
-                }**/
-                var a = item.category.split(',').length > 1;
-                var b = (!item.ext$.concentration && !item.stdValue);
-                if (a || b) {
-                    html += `<td id="TD${item.onlyNo}"><button onclick="showStockInfo(${item.stockId},'${item.onlyNo}')">+${item.ext$.concentration ? item.ext$.concentration : ''}</button>`;
-                } else {
-                    html += `<td id="TD${item.onlyNo}">${item.ext$.concentration ? item.ext$.concentration : ''}`;
-                }
-                html += `${item.ext$.stockdilutionmethod?('<font color="green">【稀释:'+item.ext$.stockdilutionmethod+'】</font>'):''}</td>`
+                html += `<td class="sinfo" id="${item.stockId}_${item.onlyNo}">${item.ext$.concentration ? item.ext$.concentration : ''}${item.ext$.stockdilutionmethod?('<font color="green">【稀释:'+item.ext$.stockdilutionmethod+'】</font>'):''}</td>`
                 html += `<td>${item.effectiveDate}</td>
                  <td>${item.createdById}</td>
                  <td>${item.remark ? item.remark +'<br>'+ item.receiveDate : item.receiveDate}</td>
@@ -834,8 +831,10 @@ function search_qc(){
             return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         }
 
+
+}
         function showStockInfo(stockId, onlyNo) {
-            /**原生url
+            //原生url
             ext_url = 'http://59.211.223.38:8080/secure/emc/module/mdm/basemdm/mtls/stocks/'+ stockId + '/concents/queries'
             fetch(ext_url, {
                 method: 'POST',
@@ -843,26 +842,16 @@ function search_qc(){
                 headers: {'Content-Type': 'application/json'}
             })
             .then(response => response.json())
-            .then(data=>renderTable(data.rows))
-            **/
-            ext_url = 'http://gxpf.hima.eu.org:8888/search_qcxq'
-            fetch(ext_url, {
-                method: 'POST',
-                body: JSON.stringify({ "stockId": stockId }),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-                .then(response => response.json())
-                .then(data => renderTable(data, stockId, onlyNo))
-            return ''
+            .then(data=>renderTable(data, stockId, onlyNo))
+           return ''
         }
 
         function renderTable(data, stockId, onlyNo) {
-            if (data.code==0){
-                alert(data.msg);
-                return;
+            var targetCell = document.getElementById(stockId+"_" + onlyNo);
+            if(targetCell.querySelector("div")){
+                targetCell.removeChild(targetCell.querySelector("div"));
             }
+
             if (data.rows.length==0){
                 alert('Reccept 0 result');
                 return;
@@ -870,6 +859,7 @@ function search_qc(){
             // 创建表格元素
             var table = document.createElement("table");
             table.border = "1";
+            table.width = "100%";
 
             // 创建表头
             var thead = document.createElement("thead");
@@ -914,7 +904,7 @@ function search_qc(){
             table.appendChild(tbody);
 
             // 找到另一个表格中目标单元格的元素
-            var targetCell = document.getElementById("TD" + onlyNo);
+            var targetCell = document.getElementById(stockId+"_" + onlyNo);
 
             // 创建一个包含新表格的父元素
             var wrapperDiv = document.createElement("div");
@@ -925,8 +915,6 @@ function search_qc(){
             // 将包装器插入到目标单元格中
             targetCell.appendChild(wrapperDiv);
         }
-
-}
 
 
 //-------------------------------------------------------
