@@ -133,3 +133,121 @@ async function sendInBatches(orgIds, batchSize, concurrentRequests) {
 sendInBatches(orgIds.slice(), batchSize, concurrentRequests);
 
 //----------------------------------------
+
+
+
+//更新质控样详情------20240530-----------------------
+const API_URL = "http://59.211.223.38:8080/secure/emc/module/mdm/basemdm/mtl-receives/queries/searchable";
+const PAYLOAD_TEMPLATE = {
+    "p": {
+        "f": {},
+        "n": 1,
+        "s": 20,
+        "qf": { "onlyNo_CISC": "2024" },
+        "o": [{ "receiveDate": "desc" }]
+    }
+};
+const STOCK_URL_TEMPLATE = "http://59.211.223.38:8080/secure/emc/module/mdm/basemdm/mtls/stocks/";
+const UPDATE_URL = "https://api.hima.eu.org/stort_qcxq";
+
+async function fetchQualityControlData() {
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify(PAYLOAD_TEMPLATE),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        processRows(data.rows);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+}
+
+function processRows(rows) {
+    const stockIds = [...new Set(
+        rows
+            .filter(row => (row.category.split(',').length > 1) || (!row.ext$.concentration && !row.stdValue))
+            .map(row => row.stockId)
+    )];
+    updateDatabaseWithStockIds(stockIds);
+}
+
+async function fetchStockData(stockId) {
+    const url = `${STOCK_URL_TEMPLATE}${stockId}/concents/queries`;
+    const payload = { "p": { "f": {}, "n": 1, "s": 50, "qf": {} } };
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.rows;
+    } catch (error) {
+        console.error(`Error fetching data for stock ID ${stockId}:`, error);
+        return [];
+    }
+}
+
+async function updateDatabaseWithStockIds(stockIds) {
+    const MAX_CONCURRENT_REQUESTS = 10;
+    let results = [];
+    
+    for (let i = 0; i < stockIds.length; i += MAX_CONCURRENT_REQUESTS) {
+        const stockIdBatch = stockIds.slice(i, i + MAX_CONCURRENT_REQUESTS);
+        const fetchPromises = stockIdBatch.map(stockId => fetchStockData(stockId));
+        
+        try {
+            const batchResults = await Promise.all(fetchPromises);
+            results = results.concat(...batchResults);
+        } catch (error) {
+            console.error('Error in batch fetch:', error);
+        }
+    }
+    
+    console.log('Final merged results:', results);
+    await sendResultsToUpdateAPI(results);
+}
+
+async function sendResultsToUpdateAPI(results) {
+    try {
+        const response = await fetch(UPDATE_URL, {
+            method: 'POST',
+            body: JSON.stringify(results),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Update API response:', data);
+    } catch (error) {
+        console.error('Error sending results to update API:', error);
+    }
+}
+
+// 调用函数以获取和处理数据
+fetchQualityControlData();
+
+
+//结束更新质控样详情----20240530-----------------
