@@ -19,7 +19,7 @@ setTimeout(function my_nav() {
         <button id="get_qcvalue" >查密码样</button>
         <button id="get_fxyps" >复制样品编号</button>
         <span id="dForm"></span>
-        <button id="updatedb_qc" >更新质控样数据库</button>
+        <input type="number" id="update_num"  style="width:50px"/><button id="updatedb_qc" >更新质控样数据库</button>
         <div class="show_container" style="display:block"></div>
         `
     document.body.insertBefore(div, app)
@@ -556,8 +556,9 @@ function handle(e) {
     })
 }
 
-//===========================查最新50条信息===================存储到db========================================================
+/**===========================查最新50条信息===================存储到db========================================================
 function update2db_qc() {
+
     const orgIds = ["101001", "101002", "101003", "101004", "101005", "101006", "101007", "101008", "101009", "101010", "101011", "101012", "101013", "101014"];
     const url = "http://59.211.223.38:8080/secure/emc/module/mdm/basemdm/mtl-receives/queries/searchable";
     const payloadTemplate = {
@@ -615,6 +616,36 @@ function update2db_qc() {
     sendInBatches(orgIds.slice(), batchSize, concurrentRequests);
     function stort_qc(data) {
         fetch('http://gxpf.hima.eu.org:8888/stort_qc', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'application/json' }
+        })
+            .then(response => response.json())
+            .then(data => alert(data.msg))
+    }
+}
+**/
+function update2db_qc() {
+    const url = "http://59.211.223.38:8080/secure/emc/module/mdm/basemdm/mtl-receives/queries/searchable";
+    const payloadTemplate = {
+        "p": {
+            "f": {},
+            "n": 1,
+            "s": document.getElementById("update_num").value,
+            "qf": {"onlyNo_CISC":"2024"},
+            "o": [{ "receiveDate": "desc" }]
+        }
+    };
+    fetch(url, {
+        method: 'POST',
+        body: JSON.stringify(payloadTemplate),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(response => response.json()).then(data=>stort_qc(data.rows))
+    function stort_qc(data) {
+        fetch('https://api.hima.eu.org/stort_qc', {
             method: 'POST',
             body: JSON.stringify(data),
             headers: { 'Content-Type': 'application/json' }
@@ -887,7 +918,7 @@ function search_qc(){
                 tr.appendChild(tdCategory);
 
                 var tdStdValueUncertainty = document.createElement("td");
-                tdStdValueUncertainty.textContent = item.stdValue?item.stdValue:'' + (item.uncertainty ? (" ± " + item.uncertainty) : '') + (item.concentUnitName?item.concentUnitName:'');
+                tdStdValueUncertainty.textContent = (item.stdValue?item.stdValue:'') + (item.uncertainty ? (" ± " + item.uncertainty) : '') + (item.concentUnitName?item.concentUnitName:'');
                 tr.appendChild(tdStdValueUncertainty);
 
                 var tdLimitRange = document.createElement("td");
