@@ -1,18 +1,10 @@
 setTimeout(function my_nav() {
-    // const j_script = document.createElement('script')
-    // j_script.src = "http://libs.baidu.com/jquery/2.1.1/jquery.min.js"
-    // document.head.appendChild(j_script)
-    // mycss = document.createElement('link')
-    // mycss.setAttribute('rel', 'stylesheet')
-    // mycss.setAttribute('href', 'http://ks.ezyro.com/css/lims.css')
-    // document.body.appendChild(mycss)
     const app = document.getElementById("app")
     if (!app) {
         console.log("app not loaded, exit.")
         return
     }
     console.log("fucking lims ...")
-    //document.querySelector(".nav-logo-text").remove()
     const div = document.createElement("div")
     div.style.position = "relative"
     div.classList = "mynav"
@@ -895,7 +887,7 @@ function search_qc(){
                 tr.appendChild(tdCategory);
 
                 var tdStdValueUncertainty = document.createElement("td");
-                tdStdValueUncertainty.textContent = item.stdValue?item.stdValue:'' + (item.uncertainty ? (" ± " + item.uncertainty) : '') + item.concentUnitName?item.concentUnitName:'';
+                tdStdValueUncertainty.textContent = item.stdValue?item.stdValue:'' + (item.uncertainty ? (" ± " + item.uncertainty) : '') + （item.concentUnitName?item.concentUnitName:''）;
                 tr.appendChild(tdStdValueUncertainty);
 
                 var tdLimitRange = document.createElement("td");
