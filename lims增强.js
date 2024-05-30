@@ -887,7 +887,7 @@ function search_qc(){
                 tr.appendChild(tdCategory);
 
                 var tdStdValueUncertainty = document.createElement("td");
-                tdStdValueUncertainty.textContent = item.stdValue?item.stdValue:'' + (item.uncertainty ? (" ± " + item.uncertainty) : '') + （item.concentUnitName?item.concentUnitName:''）;
+                tdStdValueUncertainty.textContent = item.stdValue?item.stdValue:'' + (item.uncertainty ? (" ± " + item.uncertainty) : '') + (item.concentUnitName?item.concentUnitName:'');
                 tr.appendChild(tdStdValueUncertainty);
 
                 var tdLimitRange = document.createElement("td");
