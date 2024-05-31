@@ -973,7 +973,7 @@ function search_qc(){
             targetCell.appendChild(wrapperDiv);
         }
 
-        function sendResultsToUpdateAPI(results) { {
+        function sendResultsToUpdateAPI(results) {
             const UPDATE_URL = "https://api.hima.eu.org/stort_qcxq";
             try {
                 const response = fetch(UPDATE_URL, {
