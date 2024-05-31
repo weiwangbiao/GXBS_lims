@@ -896,7 +896,10 @@ function search_qc(){
                 headers: {'Content-Type': 'application/json'}
             })
             .then(response => response.json())
-            .then(data=>renderTable(data, stockId, onlyNo))
+            .then(data=>{
+                renderTable(data, stockId, onlyNo);
+                sendResultsToUpdateAPI(data.rows);
+            })
            return ''
         }
 
@@ -970,5 +973,23 @@ function search_qc(){
             targetCell.appendChild(wrapperDiv);
         }
 
-
+        function sendResultsToUpdateAPI(results) { {
+            const UPDATE_URL = "https://api.hima.eu.org/stort_qcxq";
+            try {
+                const response = fetch(UPDATE_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(results),
+                    headers: {
+                         'Content-Type': 'application/json'
+                    }
+                    });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = response.json();
+                console.log('Update API response:', data);
+                } catch (error) {
+                    console.error('Error sending results to update API:', error);
+                  }
+        }
 //-------------------------------------------------------
