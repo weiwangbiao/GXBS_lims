@@ -885,11 +885,6 @@ function search_qc(){
             html += `</table>`;
             document.getElementById('results').innerHTML = html;
         }
-        // 判断是否为iOS设备
-        function isIOS() {
-            return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        }
-
 
 }
         function showStockInfo(stockId, onlyNo) {
