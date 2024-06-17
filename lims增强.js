@@ -259,7 +259,7 @@ async function get_samples(orderno) {
                 .then(() => {
                     if (samples.ypfzs.length > 0) {
                         fetchNextBatch();
-                        document.querySelector("#proces").innerHTML = (samples.ypfzs_bak.length-samples.ypfzs.length)+"/"+samples.ypfzs_bak.length
+                        document.querySelector("#proces").innerHTML = (samples.ypfzs_bak.length - samples.ypfzs.length) + "/" + samples.ypfzs_bak.length
                     } else {
                         // 将 samples 对象保存到 localStorage
                         document.querySelector("#loading").style.display = "none"
@@ -544,11 +544,11 @@ function handle(e) {
         update2db_qc()
         return
     }
-    document.querySelectorAll(".sinfo").forEach(item=>{
-        if(item==e.target){
-            if(e.target.querySelector("div")){
+    document.querySelectorAll(".sinfo").forEach(item => {
+        if (item == e.target) {
+            if (e.target.querySelector("div")) {
                 e.target.removeChild(e.target.querySelector("div"))
-            }else{
+            } else {
                 showStockInfo(e.target.id.split("_")[0], e.target.id.split("_")[1])
                 return
             }
@@ -631,7 +631,7 @@ function update2db_qc() {
 
     // 第一个API的URL
     const url = "http://59.211.223.38:8080/secure/emc/module/mdm/basemdm/mtl-receives/queries/searchable";
-    
+
     // 构造请求体模板
     const payloadTemplate = {
         "p": {
@@ -651,20 +651,20 @@ function update2db_qc() {
             'Content-Type': 'application/json'
         }
     })
-    .then(response => response.json())
-    .then(data => {
-        // 如果第一个请求成功，处理数据并发送到第二个API
-        if (data && data.rows) {
-            stort_qc(data.rows);
-        } else {
-            alert("No data received from the first API.");
-        }
-    })
-    .catch(error => {
-        // 处理第一个请求的错误
-        console.error('Error:', error);
-        alert('Failed to fetch data from the first API.');
-    });
+        .then(response => response.json())
+        .then(data => {
+            // 如果第一个请求成功，处理数据并发送到第二个API
+            if (data && data.rows) {
+                stort_qc(data.rows);
+            } else {
+                alert("No data received from the first API.");
+            }
+        })
+        .catch(error => {
+            // 处理第一个请求的错误
+            console.error('Error:', error);
+            alert('Failed to fetch data from the first API.');
+        });
 
     // 定义第二个API的处理函数
     function stort_qc(data) {
@@ -673,16 +673,16 @@ function update2db_qc() {
             body: JSON.stringify(data),
             headers: { 'Content-Type': 'application/json' }
         })
-        .then(response => response.json())
-        .then(data => {
-            // 处理第二个请求的响应
-            alert(data.msg);
-        })
-        .catch(error => {
-            // 处理第二个请求的错误
-            console.error('Error:', error);
-            alert('Failed to send data to the second API.');
-        });
+            .then(response => response.json())
+            .then(data => {
+                // 处理第二个请求的响应
+                alert(data.msg);
+            })
+            .catch(error => {
+                // 处理第二个请求的错误
+                console.error('Error:', error);
+                alert('Failed to send data to the second API.');
+            });
     }
 }
 
@@ -690,174 +690,175 @@ function update2db_qc() {
 
 
 //---------------------新功能----------------------------
-function search_qc(){
+function search_qc() {
 
-        var categories = ['only No', 'batch No', 'category', 'createdById', 'remark', 'application'];
+    var categories = ['only No', 'batch No', 'category', 'createdById', 'remark', 'application'];
 
 
-            // 创建动态表单和结果显示区域
-            var dynamicFormDiv = document.createElement('span');
-            dynamicFormDiv.id = 'dynamicForm';
+    // 创建动态表单和结果显示区域
+    var dynamicFormDiv = document.createElement('span');
+    dynamicFormDiv.id = 'dynamicForm';
 
-            // 创建添加条件按钮
-            var addButton = document.createElement('button');
-            addButton.textContent = '+';
-            addButton.onclick = function () {
-                addCondition(categories);
-            };
+    // 创建添加条件按钮
+    var addButton = document.createElement('button');
+    addButton.textContent = '+';
+    addButton.onclick = function () {
+        addCondition(categories);
+    };
 
-            dynamicFormDiv.appendChild(addButton);
+    dynamicFormDiv.appendChild(addButton);
 
-            // 创建提交按钮
-            var submitButton = document.createElement('button');
-            submitButton.textContent = 'Submit';
-            submitButton.onclick = submitForm;
+    // 创建提交按钮
+    var submitButton = document.createElement('button');
+    submitButton.textContent = 'Submit';
+    submitButton.onclick = function () { submitForm(); }
 
-            dynamicFormDiv.appendChild(submitButton);
+    dynamicFormDiv.appendChild(submitButton);
 
-            document.getElementById('dForm').appendChild(dynamicFormDiv);
+    document.getElementById('dForm').appendChild(dynamicFormDiv);
 
-            // 创建结果显示区域
-            var resultsDiv = document.createElement('div');
-            resultsDiv.id = 'results';
-            document.querySelector(".show_container").appendChild(resultsDiv);
+    // 创建结果显示区域
+    var resultsDiv = document.createElement('div');
+    resultsDiv.id = 'results';
+    document.querySelector(".show_container").appendChild(resultsDiv);
 
-            // 添加初始查询条件
-            addCondition(categories);
+    // 添加初始查询条件
+    addCondition(categories);
 
-            // 检查初始查询条件数量，如果只有一个，隐藏删除按钮
-            var initialDropdowns = document.querySelectorAll('.dropdown');
+    // 检查初始查询条件数量，如果只有一个，隐藏删除按钮
+    var initialDropdowns = document.querySelectorAll('.dropdown');
+    var removeButtons = document.querySelectorAll('.removeButton');
+    if (initialDropdowns.length === 1) {
+        removeButtons[0].style.display = 'none';
+    }
+
+
+    // 添加查询条件的函数
+    function addCondition(categories) {
+        var dynamicFormDiv = document.getElementById('dynamicForm');
+        var dropdowns = document.querySelectorAll('.dropdown');
+
+        // 检查已添加的条件数量
+        if (dropdowns.length >= categories.length) {
+            alert('You can only add up to ' + categories.length + ' conditions.');
+            return;
+        }
+
+        var selectDropdown = document.createElement('select');
+        selectDropdown.className = 'dropdown';
+
+        categories.forEach(function (category) {
+            var option = document.createElement('option');
+            option.value = category.replace(/\s+/g, '');
+            option.textContent = category;
+            selectDropdown.appendChild(option);
+        });
+
+        dynamicFormDiv.insertBefore(selectDropdown, dynamicFormDiv.lastChild);
+
+        var inputField = document.createElement('input');
+        inputField.type = 'text';
+        inputField.className = 'inputField';
+        inputField.placeholder = 'Enter something';
+
+        // 添加按下回车键提交的功能
+        inputField.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                submitForm();
+            }
+        });
+
+        dynamicFormDiv.insertBefore(inputField, dynamicFormDiv.lastChild);
+
+        var removeButton = document.createElement('button');
+        removeButton.textContent = 'X';
+        removeButton.onclick = function () {
+            dynamicFormDiv.removeChild(selectDropdown);
+            dynamicFormDiv.removeChild(inputField);
+            dynamicFormDiv.removeChild(removeButton);
+
+            // 检查剩余的查询条件数量，如果只剩下一个，隐藏删除按钮
+            var remainingDropdowns = document.querySelectorAll('.dropdown');
             var removeButtons = document.querySelectorAll('.removeButton');
-            if (initialDropdowns.length === 1) {
+            if (remainingDropdowns.length === 1) {
                 removeButtons[0].style.display = 'none';
             }
+        };
+        removeButton.className = 'removeButton';
 
+        dynamicFormDiv.insertBefore(removeButton, dynamicFormDiv.lastChild);
 
-        // 添加查询条件的函数
-        function addCondition(categories) {
-            var dynamicFormDiv = document.getElementById('dynamicForm');
-            var dropdowns = document.querySelectorAll('.dropdown');
+        // 检查已添加的条件数量是否达到数组长度，如果是，则禁用添加按钮
+        if (dropdowns.length >= categories.length - 1) {
+            addButton.disabled = true;
+        }
+    }
 
-            // 检查已添加的条件数量
-            if (dropdowns.length >= categories.length) {
-                alert('You can only add up to ' + categories.length + ' conditions.');
-                return;
+    // 提交表单的函数
+    function submitForm(page) {
+        var selectedOptions = document.querySelectorAll('.dropdown');
+        var inputFields = document.querySelectorAll('.inputField');
+
+        // 检查是否至少有一个查询条件
+        if (selectedOptions.length === 0 || inputFields.length === 0) {
+            alert('Please add at least one search condition.');
+            return;
+        }
+        hasEmpty = false;
+        inputFields.forEach(inputField => {
+            if (!inputField.value.trim()) {
+                hasEmpty = true;
             }
-
-            var selectDropdown = document.createElement('select');
-            selectDropdown.className = 'dropdown';
-
-            categories.forEach(function (category) {
-                var option = document.createElement('option');
-                option.value = category.replace(/\s+/g, '');
-                option.textContent = category;
-                selectDropdown.appendChild(option);
-            });
-
-            dynamicFormDiv.insertBefore(selectDropdown, dynamicFormDiv.lastChild);
-
-            var inputField = document.createElement('input');
-            inputField.type = 'text';
-            inputField.className = 'inputField';
-            inputField.placeholder = 'Enter something';
-
-            // 添加按下回车键提交的功能
-            inputField.addEventListener('keydown', function (event) {
-                if (event.key === 'Enter') {
-                    submitForm();
-                }
-            });
-
-            dynamicFormDiv.insertBefore(inputField, dynamicFormDiv.lastChild);
-
-            var removeButton = document.createElement('button');
-            removeButton.textContent = 'X';
-            removeButton.onclick = function () {
-                dynamicFormDiv.removeChild(selectDropdown);
-                dynamicFormDiv.removeChild(inputField);
-                dynamicFormDiv.removeChild(removeButton);
-
-                // 检查剩余的查询条件数量，如果只剩下一个，隐藏删除按钮
-                var remainingDropdowns = document.querySelectorAll('.dropdown');
-                var removeButtons = document.querySelectorAll('.removeButton');
-                if (remainingDropdowns.length === 1) {
-                    removeButtons[0].style.display = 'none';
-                }
-            };
-            removeButton.className = 'removeButton';
-
-            dynamicFormDiv.insertBefore(removeButton, dynamicFormDiv.lastChild);
-
-            // 检查已添加的条件数量是否达到数组长度，如果是，则禁用添加按钮
-            if (dropdowns.length >= categories.length - 1) {
-                addButton.disabled = true;
-            }
+        })
+        if (hasEmpty) {
+            alert('Please input available search condition.');
+            return;
         }
 
-        // 提交表单的函数
-        function submitForm() {
-            var selectedOptions = document.querySelectorAll('.dropdown');
-            var inputFields = document.querySelectorAll('.inputField');
+        var query = {};
+        selectedOptions.forEach(function (option, index) {
+            var selectedOption = option.value.trim();
+            var inputText = inputFields[index].value.trim();
+            query[selectedOption] = inputText
+        });
 
-            // 检查是否至少有一个查询条件
-            if (selectedOptions.length === 0 || inputFields.length === 0) {
-                alert('Please add at least one search condition.');
-                return;
-            }
-            hasEmpty = false;
-            inputFields.forEach(inputField=> {
-                if(!inputField.value.trim()){
-                    hasEmpty=true;
-                }
-            })
-            if (hasEmpty){
-                    alert('Please input available search condition.');
-                    return;
-                }
-
-            var query = {};
-            selectedOptions.forEach(function (option, index) {
-                var selectedOption = option.value.trim();
-                var inputText = inputFields[index].value.trim();
-                query[selectedOption] = inputText
-            });
-
-            // 修改requestBody为对象{}
-            // {"p":{"n":1,"s":50,"qf":{"batchNo_CISC":"11","standardName_CISC":"钾"}}}
-            var qf = {}
-            for(key in query){
-                qf[key+'_CISC']=query[key];
-               }
-            var requestBody = {"p":{"n":1,"s":50,"o":[{"receiveDate":"desc"}],"qf":qf}}
-            // var requestBody = {'query': query, 'limit': 50}
-            var url = 'http://59.211.223.38:8080/secure/emc/module/mdm/basemdm/mtl-receives/queries/searchable';
-
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestBody),
-            })
-                .then(response => response.json())
-                .then(data => {
-                    renderResults(data);
-                })
-                .catch((error) => {
-                    console.error('Error:', error);
-                });
+        // 修改requestBody为对象{}
+        // {"p":{"n":1,"s":50,"qf":{"batchNo_CISC":"11","standardName_CISC":"钾"}}}
+        var qf = {}
+        for (key in query) {
+            qf[key + '_CISC'] = query[key];
         }
-        // 渲染查询结果
-        function renderResults(results) {
-            if (results.code==0){
-                alert(results.msg);
-                return;
-            }
-            if (results.rows.length==0){
-                alert('Reccept 0 result');
-                return;
-            }
-            let html = `<table border="1" id="container">
+        if (!page) { page = 1; }
+        var requestBody = { "p": { "n": page, "s": 10, "o": [{ "receiveDate": "desc" }], "qf": qf } }
+        // var requestBody = {'query': query, 'limit': 50}
+        var url = 'http://59.211.223.38:8080/secure/emc/module/mdm/basemdm/mtl-receives/queries/searchable';
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody),
+        })
+            .then(response => response.json())
+            .then(data => {
+                renderResults(data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    }
+    // 渲染查询结果
+    function renderResults(results) {
+        if (results.code == 0) {
+            alert(results.msg);
+            return;
+        }
+        if (results.rows.length == 0) {
+            alert('Reccept 0 result');
+            return;
+        }
+        let html = `<table border="1" id="container">
                 <tr>
                     <th style="width: 25%">Category</th>
                     <th style="width: 10%">Batch No</th>
@@ -869,127 +870,146 @@ function search_qc(){
                     <th style="width: 8%">remark</th>
                 </tr>`;
 
-            results.rows.forEach(item => {
-                html += `<tr>
+        results.rows.forEach(item => {
+            html += `<tr>
                     <td>${item.category}</td>
                     <td>${item.batchNo}</td>
                     <td>${item.onlyNo}</td>
                     <td>${item.stdValue ? item.stdValue : ''}</td>`;
-                html += `<td class="sinfo" id="${item.stockId}_${item.onlyNo}">${item.ext$.concentration ? item.ext$.concentration : ''}${item.ext$.stockdilutionmethod?('<font color="green">【稀释:'+item.ext$.stockdilutionmethod+'】</font>'):''}</td>`
-                html += `<td>${item.effectiveDate}</td>
+            html += `<td class="sinfo" id="${item.stockId}_${item.onlyNo}">${item.ext$.concentration ? item.ext$.concentration : ''}${item.ext$.stockdilutionmethod ? ('<font color="green">【稀释:' + item.ext$.stockdilutionmethod + '】</font>') : ''}</td>`
+            html += `<td>${item.effectiveDate}</td>
                  <td>${item.createdById}</td>
-                 <td>${item.remark ? item.remark +'<br>'+ item.receiveDate : item.receiveDate}</td>
+                 <td>${item.remark ? item.remark + '<br>' + item.receiveDate : item.receiveDate}</td>
                 </tr>`;
-            });
+        });
 
-            html += `</table>`;
-            document.getElementById('results').innerHTML = html;
+        html += `</table>`;
+        document.getElementById('results').innerHTML = html;
+        document.querySelectorAll('.pagectrl').forEach(p => p.remove())
+
+        if (results.pageNumber > 1) {
+            var prepageButton = document.createElement('button');
+            prepageButton.className = 'pagectrl';
+            prepageButton.textContent = 'Prev';
+            prepageButton.onclick = function () { submitForm(results.pageNumber - 1); }
+            document.getElementById('dynamicForm').appendChild(prepageButton);
         }
+
+        if (results.pageNumber < results.totalPages) {
+            var nextpageButton = document.createElement('button');
+            nextpageButton.className = 'pagectrl';
+            nextpageButton.textContent = 'Next';
+            nextpageButton.onclick = function () { submitForm(results.pageNumber + 1); }
+            document.getElementById('dynamicForm').appendChild(nextpageButton);
+        }
+
+
+    }
 
 }
-        function showStockInfo(stockId, onlyNo) {
-            //原生url
-            ext_url = 'http://59.211.223.38:8080/secure/emc/module/mdm/basemdm/mtls/stocks/'+ stockId + '/concents/queries'
-            fetch(ext_url, {
-                method: 'POST',
-                body: JSON.stringify({"p":{"f":{},"n":1,"s":50,"qf":{}}}),
-                headers: {'Content-Type': 'application/json'}
-            })
-            .then(response => response.json())
-            .then(data=>{
-                renderTable(data, stockId, onlyNo);
-                sendResultsToUpdateAPI(data.rows);
-            })
-           return ''
-        }
+function showStockInfo(stockId, onlyNo) {
+    //原生url
+    ext_url = 'http://59.211.223.38:8080/secure/emc/module/mdm/basemdm/mtls/stocks/' + stockId + '/concents/queries'
+    fetch(ext_url, {
+        method: 'POST',
+        body: JSON.stringify({ "p": { "f": {}, "n": 1, "s": 50, "qf": {} } }),
+        headers: { 'Content-Type': 'application/json' }
+    })
+        .then(response => response.json())
+        .then(data => {
+            renderTable(data, stockId, onlyNo);
+            sendResultsToUpdateAPI(data.rows);
+        })
+    return ''
+}
 
-        function renderTable(data, stockId, onlyNo) {
-            var targetCell = document.getElementById(stockId+"_" + onlyNo);
-            if(targetCell.querySelector("div")){
-                targetCell.removeChild(targetCell.querySelector("div"));
+function renderTable(data, stockId, onlyNo) {
+    var targetCell = document.getElementById(stockId + "_" + onlyNo);
+    if (targetCell.querySelector("div")) {
+        targetCell.removeChild(targetCell.querySelector("div"));
+    }
+
+    if (data.rows.length == 0) {
+        alert('Reccept 0 result');
+        return;
+    }
+    // 创建表格元素
+    var table = document.createElement("table");
+    table.border = "1";
+    table.width = "100%";
+
+    // 创建表头
+    var thead = document.createElement("thead");
+    var trHead = document.createElement("tr");
+
+    var thCategory = document.createElement("th");
+    thCategory.textContent = "Category";
+    trHead.appendChild(thCategory);
+
+    var thStdValueUncertainty = document.createElement("th");
+    thStdValueUncertainty.textContent = "Std±Uncer";
+    trHead.appendChild(thStdValueUncertainty);
+
+    var thLimitRange = document.createElement("th");
+    thLimitRange.textContent = "Low~High";
+    trHead.appendChild(thLimitRange);
+
+    thead.appendChild(trHead);
+    table.appendChild(thead);
+
+    // 创建表格内容
+    var tbody = document.createElement("tbody");
+
+    data.rows.forEach(function (item) {
+        var tr = document.createElement("tr");
+
+        var tdCategory = document.createElement("td");
+        tdCategory.textContent = item.category;
+        tr.appendChild(tdCategory);
+
+        var tdStdValueUncertainty = document.createElement("td");
+        tdStdValueUncertainty.textContent = (item.stdValue ? item.stdValue : '') + (item.uncertainty ? (" ± " + item.uncertainty) : '') + (item.concentUnitName ? item.concentUnitName : '');
+        tr.appendChild(tdStdValueUncertainty);
+
+        var tdLimitRange = document.createElement("td");
+        tdLimitRange.textContent = (item.lowLimit ? item.lowLimit : '') + (item.highLimit ? ("~" + item.highLimit) : '');
+        tr.appendChild(tdLimitRange);
+
+        tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+
+    // 找到另一个表格中目标单元格的元素
+    var targetCell = document.getElementById(stockId + "_" + onlyNo);
+
+    // 创建一个包含新表格的父元素
+    var wrapperDiv = document.createElement("div");
+
+    // 将新表格添加到包装器中
+    wrapperDiv.appendChild(table);
+
+    // 将包装器插入到目标单元格中
+    targetCell.appendChild(wrapperDiv);
+}
+
+function sendResultsToUpdateAPI(results) {
+    const UPDATE_URL = "https://api.hima.eu.org/stort_qcxq";
+    try {
+        const response = fetch(UPDATE_URL, {
+            method: 'POST',
+            body: JSON.stringify(results),
+            headers: {
+                'Content-Type': 'application/json'
             }
-
-            if (data.rows.length==0){
-                alert('Reccept 0 result');
-                return;
-            }
-            // 创建表格元素
-            var table = document.createElement("table");
-            table.border = "1";
-            table.width = "100%";
-
-            // 创建表头
-            var thead = document.createElement("thead");
-            var trHead = document.createElement("tr");
-
-            var thCategory = document.createElement("th");
-            thCategory.textContent = "Category";
-            trHead.appendChild(thCategory);
-
-            var thStdValueUncertainty = document.createElement("th");
-            thStdValueUncertainty.textContent = "Std±Uncer";
-            trHead.appendChild(thStdValueUncertainty);
-
-            var thLimitRange = document.createElement("th");
-            thLimitRange.textContent = "Low~High";
-            trHead.appendChild(thLimitRange);
-
-            thead.appendChild(trHead);
-            table.appendChild(thead);
-
-            // 创建表格内容
-            var tbody = document.createElement("tbody");
-
-            data.rows.forEach(function (item) {
-                var tr = document.createElement("tr");
-
-                var tdCategory = document.createElement("td");
-                tdCategory.textContent = item.category;
-                tr.appendChild(tdCategory);
-
-                var tdStdValueUncertainty = document.createElement("td");
-                tdStdValueUncertainty.textContent = (item.stdValue?item.stdValue:'') + (item.uncertainty ? (" ± " + item.uncertainty) : '') + (item.concentUnitName?item.concentUnitName:'');
-                tr.appendChild(tdStdValueUncertainty);
-
-                var tdLimitRange = document.createElement("td");
-                tdLimitRange.textContent = (item.lowLimit?item.lowLimit:'') +(item.highLimit?("~" + item.highLimit):'');
-                tr.appendChild(tdLimitRange);
-
-                tbody.appendChild(tr);
-            });
-
-            table.appendChild(tbody);
-
-            // 找到另一个表格中目标单元格的元素
-            var targetCell = document.getElementById(stockId+"_" + onlyNo);
-
-            // 创建一个包含新表格的父元素
-            var wrapperDiv = document.createElement("div");
-
-            // 将新表格添加到包装器中
-            wrapperDiv.appendChild(table);
-
-            // 将包装器插入到目标单元格中
-            targetCell.appendChild(wrapperDiv);
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-
-        function sendResultsToUpdateAPI(results) {
-            const UPDATE_URL = "https://api.hima.eu.org/stort_qcxq";
-            try {
-                const response = fetch(UPDATE_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(results),
-                    headers: {
-                         'Content-Type': 'application/json'
-                    }
-                    });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = response.json();
-                console.log('Update API response:', data);
-                } catch (error) {
-                    console.error('Error sending results to update API:', error);
-                  }
-        }
+        const data = response.json();
+        console.log('Update API response:', data);
+    } catch (error) {
+        console.error('Error sending results to update API:', error);
+    }
+}
 //-------------------------------------------------------
