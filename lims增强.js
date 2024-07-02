@@ -265,6 +265,7 @@ async function get_samples(orderno) {
                         document.querySelector("#loading").style.display = "none"
                         deal_data(samples.yps)
                         localStorage.setItem("samples", JSON.stringify(samples))
+                        savesamplestodb(samples)
                         //get_qcvalue()
                         showHTML(samples.yps, document.querySelector(".show_container"))
 
@@ -323,6 +324,7 @@ function get_qcvalue() {
                 })
                 samples.QCs.push(...re.rows)
                 localStorage.setItem("samples", JSON.stringify(samples))
+                savesamplestodb(samples)
             })
         }
     })
@@ -1020,8 +1022,8 @@ function sendResultsToUpdateAPI(results) {
 //-------------------------------------------------------
 
 //-----保存样品到db-----------------
-function savesampletodb(samples) {
-    const UPDATE_URL = "https://api.hima.eu.org/savesampletodb";
+function savesamplestodb(samples) {
+    const UPDATE_URL = "https://api.hima.eu.org/savesamplestodb";
     try {
         const response = fetch(UPDATE_URL, {
             method: 'POST',
