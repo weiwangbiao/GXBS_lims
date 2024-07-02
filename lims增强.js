@@ -324,10 +324,10 @@ function get_qcvalue() {
                 })
                 samples.QCs.push(...re.rows)
                 localStorage.setItem("samples", JSON.stringify(samples))
-                savesamplestodb(samples)
             })
         }
     })
+    savesamplestodb(samples)
     document.querySelector("#loading").style.display = "none"
     showHTML(samples.yps, document.querySelector(".show_container"))
 }
