@@ -1036,4 +1036,83 @@ function savesamplestodb(samples) {
     return 'ok';    
 }
 //----------------保存样品结束
+//------------fetch重写qc密码质控样的数据---
+async function processSamplesAndFetchData() {
+    // 从localStorage获取数据
+    const samples = JSON.parse(localStorage.getItem('samples'));
+    const yps = samples.yps;
+
+    // 过滤出qcName为“密码质量控制”的项
+    const filteredItems = yps.filter(item => item.qcName === '密码质量控制');
+
+    // 并发控制的函数
+    async function fetchWithConcurrency(items, maxConcurrency, url, createBody) {
+        let index = 0;
+        const results = [];
+
+        async function next() {
+            if (index >= items.length) return;
+            const item = items[index++];
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(createBody(item))
+            });
+            const data = await response.json();
+            results.push(data);
+            await next();
+        }
+
+        const workers = Array.from({ length: maxConcurrency }, () => next());
+        await Promise.all(workers);
+        return results;
+    }
+
+    // 发起第一个并发请求
+    const maxConcurrency = 3;
+    const firstUrl = 'http://59.211.223.38:8080/secure/emc/module/bp/bp/order-tasks/order-item-group/queries';
+    const firstBodyCreator = (item) => ({
+        "p": {
+            "f": {
+                "orderContainerId_SEQ": item.id
+            },
+            "n": 1,
+            "s": 50,
+            "qf": {}
+        }
+    });
+
+    const firstResults = await fetchWithConcurrency(filteredItems, maxConcurrency, firstUrl, firstBodyCreator);
+
+    // 提取并去重ordertaskid
+    const ordertaskIds = [...new Set(firstResults.flatMap(result => result.data.rows.map(row => row.ext$.ordertaskid)))];
+
+    // 发起第二个并发请求
+    const secondUrl = 'http://59.211.223.38:8080/secure/emc/module/bp/order-task-concents/queries/raw';
+    const secondBodyCreator = (ordertaskid) => ({
+        "p": {
+            "f": {
+                "orderTaskId_IN": ordertaskid
+            },
+            "n": 1,
+            "s": 50,
+            "qf": {}
+        }
+    });
+
+    const secondResults = await fetchWithConcurrency(ordertaskIds, maxConcurrency, secondUrl, secondBodyCreator);
+
+    // 提取第二个请求返回的数据.rows数组并合并
+    const qcs = secondResults.flatMap(result => result.data.rows);
+
+    // 将结果存储到localStorage中的samples.QCs中
+    samples.QCs = qcs;
+    localStorage.setItem('samples', JSON.stringify(samples));
+
+    // 打印结果
+    console.log(samples.QCs);
+}
+//----重写结束----------
 
