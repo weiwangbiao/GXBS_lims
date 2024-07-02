@@ -1018,3 +1018,26 @@ function sendResultsToUpdateAPI(results) {
     }
 }
 //-------------------------------------------------------
+
+//-----保存样品到db-----------------
+function savesampletodb(samples) {
+    const UPDATE_URL = "https://api.hima.eu.org/savesampletodb";
+    try {
+        const response = fetch(UPDATE_URL, {
+            method: 'POST',
+            body: JSON.stringify(samples),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = response.json();
+        console.log('Update API response:', data);
+    } catch (error) {
+        console.error('Error sending results to update API:', error);
+    }
+}
+//----------------保存样品结束
+
