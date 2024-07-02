@@ -884,6 +884,11 @@ function search_qc() {
         });
 
         html += `</table>`;
+        if (!document.getElementById('results')) {
+            var resultsDiv = document.createElement('div');
+            resultsDiv.id = 'results';
+            document.querySelector(".show_container").appendChild(resultsDiv);
+        }
         document.getElementById('results').innerHTML = html;
         document.querySelectorAll('.pagectrl').forEach(p => p.remove())
 
