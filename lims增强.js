@@ -16,7 +16,6 @@ setTimeout(function my_nav() {
     </div>
         通过样品编号：<input type="text" id="sampleNo" /><button id="search_by_sampleNo" >查任务</button>
         通过任务号：<input type="text" id="inp_orderNo" /><button id="search_by_orderNo" >查样品</button>
-        <button id="get_qcvalue" >查密码样</button>
         <button id="get_fxyps" >复制样品编号</button>
         <span id="dForm"></span>
         <input type="number" id="update_num"  style="width:50px"/><button id="updatedb_qc" >更新质控样数据库</button>
@@ -266,7 +265,7 @@ async function get_samples(orderno) {
                         deal_data(samples.yps)
                         localStorage.setItem("samples", JSON.stringify(samples))
                         savesamplestodb(samples)
-                        //get_qcvalue()
+                        get_qcvalue()
                         showHTML(samples.yps, document.querySelector(".show_container"))
 
                     }
@@ -299,7 +298,7 @@ function deal_data(yps) {
         }
     })
 }
-function get_qcvalue() {
+async function get_qcvalue() {
     // 显示loading
     document.querySelector("#loading").style.display = "block"
     // 从localStorage获取数据
@@ -416,7 +415,7 @@ function get_qcvalue() {
     document.querySelector("#loading").style.display = "none"
     showHTML(samples.yps, document.querySelector(".show_container"))
     ***********************************************************************/
-    
+
 }
 async function get_pa_yps(pa_no) {
     const r = await pajax({
@@ -645,75 +644,7 @@ function handle(e) {
     })
 }
 
-/**===========================查最新50条信息===================存储到db========================================================
-function update2db_qc() {
 
-    const orgIds = ["101001", "101002", "101003", "101004", "101005", "101006", "101007", "101008", "101009", "101010", "101011", "101012", "101013", "101014"];
-    const url = "http://59.211.223.38:8080/secure/emc/module/mdm/basemdm/mtl-receives/queries/searchable";
-    const payloadTemplate = {
-        "p": {
-            "f": {
-                "orgId_SEQ": null,
-                "parentId": "1"
-            },
-            "n": 1,
-            "s": 20,
-            "qf": {},
-            "o": [{ "receiveDate": "desc" }]
-        }
-    };
-    async function sendRequests(orgIdsBatch) {
-        const rows = [];
-        await Promise.all(orgIdsBatch.map(orgId => {
-            payloadTemplate.p.f.orgId_SEQ = orgId;
-            return fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payloadTemplate)
-            })
-                .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.json();
-            })
-                .then(data => {
-                console.log(`Response for orgId ${orgId}:`);
-                rows.push(...data.rows); // 将当前请求的 rows 字段合并到总的 rows 数组中
-            })
-                .catch(error => {
-                console.error(`Error requesting orgId ${orgId}:`, error);
-            });
-        }));
-        return rows;
-    }
-    const batchSize = 5;
-    const concurrentRequests = 5;
-    async function sendInBatches(orgIds, batchSize, concurrentRequests) {
-        const allRows = [];
-        while (orgIds.length > 0) {
-            const orgIdsBatch = orgIds.splice(0, batchSize);
-            const rows = await sendRequests(orgIdsBatch);
-            allRows.push(...rows);
-        }
-        console.log("All rows:", allRows); // 打印所有请求合并后的 rows 字段
-        //allRows = allRows.filter(i => i.onlyNo); //去除onlyNo为空的数据
-        stort_qc(allRows.filter(i => i.onlyNo)); //存储到db
-    }
-    sendInBatches(orgIds.slice(), batchSize, concurrentRequests);
-    function stort_qc(data) {
-        fetch('http://gxpf.hima.eu.org:8888/stort_qc', {
-            method: 'POST',
-            body: JSON.stringify(data),
-            headers: { 'Content-Type': 'application/json' }
-        })
-            .then(response => response.json())
-            .then(data => alert(data.msg))
-    }
-}
-**/
 function update2db_qc() {
     // 获取输入框中的更新数量
     const update_num = document.getElementById("update_num").value;
@@ -1120,7 +1051,7 @@ function savesamplestodb(samples) {
         .then(data => {
             console.log('Update API response:', data);
         })
-    return 'ok';    
+    return 'ok';
 }
 //----------------保存样品结束
 
