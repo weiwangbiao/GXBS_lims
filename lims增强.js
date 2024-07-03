@@ -266,7 +266,7 @@ async function get_samples(orderno) {
                         localStorage.setItem("samples", JSON.stringify(samples))
                         savesamplestodb(samples)
                         get_qcvalue()
-                        showHTML(samples.yps, document.querySelector(".show_container"))
+                        //showHTML(samples.yps, document.querySelector(".show_container"))
 
                     }
                 })
