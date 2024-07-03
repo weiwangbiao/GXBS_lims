@@ -1087,7 +1087,7 @@ async function processSamplesAndFetchData() {
     const firstResults = await fetchWithConcurrency(filteredItems, maxConcurrency, firstUrl, firstBodyCreator);
 
     // 提取并去重ordertaskid
-    const ordertaskIds = [...new Set(firstResults.flatMap(result => result.data.rows.map(row => row.ext$.ordertaskid)))];
+    const ordertaskIds = [...new Set(firstResults.flatMap(result => result.rows.map(row => row.ext$.ordertaskid)))];
 
     // 发起第二个并发请求
     const secondUrl = 'http://59.211.223.38:8080/secure/emc/module/bp/order-task-concents/queries/raw';
@@ -1105,7 +1105,7 @@ async function processSamplesAndFetchData() {
     const secondResults = await fetchWithConcurrency(ordertaskIds, maxConcurrency, secondUrl, secondBodyCreator);
 
     // 提取第二个请求返回的数据.rows数组并合并
-    const qcs = secondResults.flatMap(result => result.data.rows);
+    const qcs = secondResults.flatMap(result => result.rows);
 
     // 将结果存储到localStorage中的samples.QCs中
     samples.QCs = qcs;
