@@ -12,7 +12,7 @@ setTimeout(function my_nav() {
     div.innerHTML =
         `
         <div id="loading" style="display:none;background-color: rgb(0 0 0 / 80%);border-radius: 50px;border: 1px solid rgb(211, 212, 211);z-index: 19891017;position: absolute;width: 50%;color: white;font-size: larger;text-align: center;left: 50%;margin-left: -350px;">
-        数据加载中<span id="proces">999</span>……
+        数据加载中<span id="proces"></span>……
     </div>
         通过样品编号：<input type="text" id="sampleNo" /><button id="search_by_sampleNo" >查任务</button>
         通过任务号：<input type="text" id="inp_orderNo" /><button id="search_by_orderNo" >查样品</button>
@@ -29,7 +29,7 @@ setTimeout(function my_nav() {
     document.querySelector("#show_hide").addEventListener("click", show_handle)
     search_qc()
 }, 5000)
-// 封装 ajax
+/*************** 封装 ajax
 function ajax(options) {
     let defaultoptions = {
         url: "",
@@ -95,6 +95,7 @@ function pajax(options) {
         })
     })
 }
+*************************************/
 const host = 'http://59.211.223.38:8080'
 async function get_samples(orderno) {
     document.querySelector("#loading").style.display = "block"
@@ -264,7 +265,6 @@ async function get_samples(orderno) {
                         document.querySelector("#loading").style.display = "none"
                         deal_data(samples.yps)
                         localStorage.setItem("samples", JSON.stringify(samples))
-                        savesamplestodb(samples)
                         get_qcvalue()
                         //showHTML(samples.yps, document.querySelector(".show_container"))
 
@@ -301,6 +301,7 @@ function deal_data(yps) {
 async function get_qcvalue() {
     // 显示loading
     document.querySelector("#loading").style.display = "block"
+    document.querySelector("#proces").innerHTML = "获取密码质控样数据中" 
     // 从localStorage获取数据
     const samples = JSON.parse(localStorage.getItem('samples'));
     const yps = samples.yps;
@@ -324,6 +325,7 @@ async function get_qcvalue() {
                 body: JSON.stringify(createBody(item))
             });
             const data = await response.json();
+            document.querySelector("#proces").innerHTML = index + "/" + items.length
             results.push(data);
             await next();
         }
