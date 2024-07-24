@@ -15,10 +15,10 @@ setTimeout(function my_nav() {
         数据加载中<span id="proces"></span>……
     </div>
         通过样品编号：<input type="text" id="sampleNo" /><button id="search_by_sampleNo" >查任务</button>
-        通过任务号：<input type="text" id="inp_orderNo" /><button id="search_by_orderNo" >查样品</button>
+        通过任务号：<input type="text" id="inp_orderNo" /><button id="search_by_orderNo" >查样品</button><button id="runResult" >检查质控结果</button>
         <button id="get_fxyps" >复制样品编号</button>
         <span id="dForm"></span>
-        <input type="number" id="update_num"  style="width:50px"/><button id="updatedb_qc" >更新质控样数据库</button>
+        <input type="number" id="update_num"  step="100" value='200' style="width:50px"/><button id="updatedb_qc" >更新质控样数据库</button>
         <div class="show_container" style="display:block"></div>
         `
     document.body.insertBefore(div, app)
@@ -29,73 +29,7 @@ setTimeout(function my_nav() {
     document.querySelector("#show_hide").addEventListener("click", show_handle)
     search_qc()
 }, 5000)
-/*************** 封装 ajax
-function ajax(options) {
-    let defaultoptions = {
-        url: "",
-        method: "GET",
-        async: true,
-        data: {},
-        headers: {},
-        res_type: "json",
-        success: function (res) { console.log("success", res) },
-        error: function (err) { console.log("error", err) }
-    }
-    let { url, method, async, data, headers, res_type, success, error } = {
-        ...defaultoptions,
-        ...options
-    }
-    if (typeof data === 'object') {  // && headers["content-type"]?.indexof("json") > -1
-        data = JSON.stringify(data)
-    }
-    else {
-        data = queryStringify(data)
-    }
-    // 如果是 get 请求，并且有参数，那么直接组装一下 ur1 信息
-    if (/^get$/i.test(method) && data) url += '?' + data
-    // 4。发送请求
-    const xhr = new XMLHttpRequest()
-    xhr.open(method, url, async)
-    xhr.onload = function () {
-        if (!/^2\d{2}$/.test(xhr.status)) {
-            error(`错误状态码:${xhr.status}`)
-            return
-        }
-        try {
-            let result = (res_type === "json" ? JSON.parse(xhr.responseText) : xhr.responseText)
-            success(result)
-        } catch (err) {
-            error("unknowe error")
-        }
-    }
-    // 设置请求头内的信息
-    for (let k in headers) xhr.setRequestHeader(k, headers[k])
-    xhr.withCredentials = true
-    if (/^get$/i.test(method)) {
-        xhr.send()
-    } else {
-        xhr.send(data)
-    }
-    function queryStringify(obj) {
-        let str = ''
-        for (let k in obj) str += `${k}=${obj[k]}&`
-        return str.slice(0, -1)
-    }
-}
-function pajax(options) {
-    return new Promise(function (resolve, reject) {
-        ajax({
-            ...options,
-            success: function (res) {
-                resolve(res)
-            },
-            error: function (err) {
-                reject(err)
-            }
-        })
-    })
-}
-*************************************/
+
 const host = 'http://59.211.223.38:8080'
 async function get_samples(orderno) {
     document.querySelector("#loading").style.display = "block"
