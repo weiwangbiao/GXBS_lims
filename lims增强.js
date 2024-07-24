@@ -1046,7 +1046,11 @@ function runResult(orderNo) {
                         }
                     })
                         .then(response => response.json())
-                        .then(data => {console.log(data.rows)})
+                        .then(data => {
+                            console.log(data.rows)
+                            alertArr = data.rows.map(row=>([row.itemName,row.orderNo,row.qcName,row.reportResult]))
+                            alert(JSON.stringify(alertArr))
+                        })
     }
 
 
