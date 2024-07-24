@@ -579,7 +579,7 @@ function handle(e) {
         }
     })
     if (e.target === document.getElementById("runResult")) {
-        runResult(document.getElementById("inp_orderNo").value')
+        runResult(document.getElementById("inp_orderNo").value)
         return
     }    
 }
