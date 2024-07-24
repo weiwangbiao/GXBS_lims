@@ -579,7 +579,7 @@ function handle(e) {
         }
     })
     if (e.target === document.getElementById("runResult")) {
-        runResult(document.getElementById("inp_orderNo").value,resultStatus='OOS')
+        runResult(document.getElementById("inp_orderNo").value')
         return
     }    
 }
@@ -997,8 +997,37 @@ function savesamplestodb(samples) {
 
 
 //---------质控结果查询
-function runResult(projId,resultStatus='OOS') {
-fetch('http://59.211.223.38:8080/secure/emc/module/bp/bp/order-task-results/queries/run-result',{
+function runResult(orderNo) {
+    
+    fetch('http://59.211.223.38:8080/secure/emc/module/bp/project/projects/queries',{
+                        method: 'POST',
+                        body: JSON.stringify({
+                          "p":{
+                            "f":{
+                              "targetType":"projEdit",
+                              "taskStatus_SEQ":"normal",
+                              "orgId_SEQ":"101009"
+                            },
+                            "n":1,
+                            "s":50,
+                            "qf":{
+                              "projNo_CISC":orderNo
+                            }
+                          }
+                        }),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                          //console.log(data.rows)
+                          data.rows.forEach(row=>{
+                          runR(row.id,'OOS')
+                          })
+                        })
+    function runR(projId,resultStatus='OOS'){
+        fetch('http://59.211.223.38:8080/secure/emc/module/bp/bp/order-task-results/queries/run-result',{
                         method: 'POST',
                         body: JSON.stringify({
                           "p":{
@@ -1018,6 +1047,8 @@ fetch('http://59.211.223.38:8080/secure/emc/module/bp/bp/order-task-results/quer
                     })
                         .then(response => response.json())
                         .then(data => {console.log(data.rows)})
+    }
+
 
 }
 
