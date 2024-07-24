@@ -578,6 +578,10 @@ function handle(e) {
             }
         }
     })
+    if (e.target === document.getElementById("runResult")) {
+        runResult(document.getElementById("inp_orderNo").value,resultStatus='OOS')
+        return
+    }    
 }
 
 
@@ -991,4 +995,29 @@ function savesamplestodb(samples) {
 }
 //----------------保存样品结束
 
+
+//---------质控结果查询
+function runResult(projId,resultStatus='OOS') {
+fetch('http://59.211.223.38:8080/secure/emc/module/bp/bp/order-task-results/queries/run-result',{
+                        method: 'POST',
+                        body: JSON.stringify({
+                          "p":{
+                            "f":{
+                              "projId":projId //从任务号查询达到projId
+                            },
+                            "n":-1,
+                            "s":50,
+                            "qf":{
+                              "resultStatus_IN":resultStatus //代表不合格，‘done’代表合格
+                            }
+                          }
+                        }),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {console.log(data.rows)})
+
+}
 
