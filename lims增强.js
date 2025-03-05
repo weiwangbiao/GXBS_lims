@@ -1056,3 +1056,63 @@ function runResult(orderNo) {
 
 }
 
+function update2db_qc_by_date(riqi) {
+    // 获取输入框中的更新数量
+    const update_num = 500;
+
+    // 第一个API的URL
+    const url = "http://59.211.223.38:8080/secure/emc/module/mdm/basemdm/mtl-receives/queries/searchable";
+
+    // 构造请求体模板
+    const payloadTemplate = {
+        "p": {
+            "f": {},
+            "n": 1,
+            "s": update_num,
+            "qf":{ "receiveDate_CISC": riqi },
+            "o": []
+        }
+    };
+
+    // 发起第一个API的请求
+    fetch(url, {
+        method: 'POST',
+        body: JSON.stringify(payloadTemplate),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            // 如果第一个请求成功，处理数据并发送到第二个API
+            if (data && data.rows) {
+                stort_qc(data.rows);
+            } else {
+                alert("No data received from the first API.");
+            }
+        })
+        .catch(error => {
+            // 处理第一个请求的错误
+            console.error('Error:', error);
+            alert('Failed to fetch data from the first API.');
+        });
+
+    // 定义第二个API的处理函数
+    function stort_qc(data) {
+        fetch('https://api.hima.eu.org/stort_qc', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'application/json' }
+        })
+            .then(response => response.json())
+            .then(data => {
+                // 处理第二个请求的响应
+                alert(data.msg);
+            })
+            .catch(error => {
+                // 处理第二个请求的错误
+                console.error('Error:', error);
+                alert('Failed to send data to the second API.');
+            });
+    }
+}
